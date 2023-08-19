@@ -7,7 +7,7 @@
 A_ROTARY_A_PIN   =  1
 A_ROTARY_B_PIN   =  2
 A_ROTARY_BTN_PIN =  3
-A_LED_R__PIN      =  4
+A_LED_R__PIN     =  4
 A_LED_Y1_PIN     =  5
 A_LED_Y2_PIN     =  6
 A_LED_Y3_PIN     =  7
@@ -27,10 +27,9 @@ A_SW_GOAL_PIN    = 10
 # B_SW_GOAL_PIN    = 10
 
 # モーターの速度
-# 0 < MOTOR_SPEED < 25 < 100(MAX)
+# 0 < MOTOR_SPEED < 15 < 100(MAX)
 MOTOR_LOW_SPEED  = 10
-MOTOR_HIGH_SPEED = 25
-
+MOTOR_HIGH_SPEED = 15
 
 from threading import Event
 from gpiozero import RotaryEncoder, Button
@@ -40,7 +39,9 @@ import RPi.GPIO as GPIO
 motor_speed_list = [0]
 motor_speed_range = 2
 for i in range(motor_speed_range+1):
-    motor_speed_list.append((MOTOR_HIGH_SPEED - MOTOR_LOW_SPEED) * i / motor_speed_range + MOTOR_LOW_SPEED)
+    motor_speed_list.append(
+        (MOTOR_HIGH_SPEED - MOTOR_LOW_SPEED) * i / motor_speed_range 
+        + MOTOR_LOW_SPEED)
 # print(motor_speed_list)
 
 # motor_speed_dict = {}
