@@ -32,5 +32,5 @@ class MotorControl:
         self.sw_start = pin_sw_start
         self.sw_goal  = pin_sw_goal
 
-    def set_motor_speed(self, hi_speed: float, low_speed: float, speed_step: int):
-        self.speed_change.set_motor_speed(hi_speed, low_speed, speed_step)
+    def run(self):
+        self.speed_change.run()

@@ -60,6 +60,14 @@ def main():
         B_SW_START_PIN    , 
         B_SW_GOAL_PIN     )
     
+    # ディスプレイ表示
+
+    # モーター制御
+    controlA.speed_change.move = True
+    controlB.speed_change.move = True
+    controlA.run()
+    controlB.run()
+    
 def ckeck():
     pins = [
         A_ROTARY_CLK_A_PIN ,
