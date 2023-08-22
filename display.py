@@ -116,6 +116,7 @@ def stop(sw_class: SWClass):
 
 class WDialog(Dialog):
     def __init__(self, root):
+        self.result = False
         super().__init__(root, title="確認")
         
     def body(self, master):
@@ -126,9 +127,8 @@ class WDialog(Dialog):
         # cancel_btn = tkinter.Button(master, text="Cancel", command=master.destroy)
         # cancel_btn.grid(row=1, column=1)
     
-    def apply(self) -> None:
-        self.destroy()
-        app.destroy()
+    def apply(self):
+        self.result = True
 
 
 # メインウィンドウ作成
@@ -138,8 +138,9 @@ app.geometry("800x300")
 
 def key_event(e):
     print(e.keysym)
-    WDialog(app)
-    # app.destroy()
+    dialog = WDialog(app)
+    if dialog.result:
+        app.destroy()
 
 app.bind("<Escape>", key_event)
 app.bind("<S>", key_event)
