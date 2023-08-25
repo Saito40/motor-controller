@@ -29,8 +29,12 @@ MOTOR_LOW_SPEED  = 10
 MOTOR_HIGH_SPEED = 15
 MOTOR_SPEED_STEP = 3
 
+
+
 import MotorControl.MotorControl as MotorControl
 import MotorControl.SpeedChange as SpeedChange
+from MotorControl.TimeData import TimeData
+from MainWindow import MainWindow
 
 def main():
     controlA = MotorControl("controlA")
@@ -67,6 +71,7 @@ def main():
     controlB.speed_change.move = True
     controlA.run()
     controlB.run()
+    main = MainWindow(tds)
     
 def ckeck():
     pins = [

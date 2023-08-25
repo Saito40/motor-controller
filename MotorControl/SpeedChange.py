@@ -1,6 +1,8 @@
 from threading import Event
 from gpiozero import RotaryEncoder, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
+from MotorControl.MotorControl import MotorControl
+from MotorControl.TimeData import TimeData
 import RPi.GPIO as GPIO
 
 STOP_SPEED = 0.
@@ -11,9 +13,9 @@ class SpeedChange:
     speed_list = [STOP_SPEED]
 
     def __init__(self, name = "changer"):
-        self.factory = PiGPIOFactory()
         self.name = name
         self.move = False
+        self.timedata = TimeData()
 
     def set_pins(self, 
                  pin_rotary_a: int, 
@@ -45,21 +47,17 @@ class SpeedChange:
         # ロータリーエンコーダ/ボタンのピン設定
         self.rotor = RotaryEncoder(
             self.pin_rotary_a, self.pin_rotary_b, wrap=True, 
-            max_steps=ROTARY_MAX_STEPS, pin_factory=self.factory
+            max_steps=ROTARY_MAX_STEPS, pin_factory=MotorControl.Factory
         )
         self.rotor.steps = 0
 
-        self.start_btn = Button(self.pin_sw_start, pull_up=True, pin_factory=self.factory)
-        self.goal_btn  = Button(self.pin_sw_goal , pull_up=True, pin_factory=self.factory)
     
     def run(self):
     
         # ロータリーエンコーダ変化時の処理
-        self.rotor.when_rotated = lambda:SpeedChange.change_rotor(self)
+        func = SpeedChange.change_rotor(self)
+        self.rotor.when_rotated = func
         
-        # ボタンリリース時の処理
-        self.goal_btn.when_released = lambda:SpeedChange.stop_script(self)
-
         self.done.wait()
 
     @staticmethod
@@ -72,19 +70,24 @@ class SpeedChange:
 
     @staticmethod
     def change_rotor(speed_change):
-        print(f"{speed_change.name}: rotor.steps is {speed_change.rotor.steps}")
-        motor_speed_id = speed_change.rotor.steps
-        if motor_speed_id < 0:
-            motor_speed_id = 0
-        if len(speed_change.speed_list)-1 < motor_speed_id:
-            motor_speed_id = len(speed_change.speed_list)-1
-        for i in range(len(speed_change.led_pin_list)):
-            GPIO.output(speed_change.led_pin_list[i], i == motor_speed_id)
-        if not speed_change.move: return
-        speed_change.motor_fw_pwm.ChangeDutyCycle(speed_change.speed_list[motor_speed_id])
+        def inner():
+            print(f"{speed_change.name}: rotor.steps is {speed_change.rotor.steps}")
+            motor_speed_id = speed_change.rotor.steps
+            if motor_speed_id < 0:
+                motor_speed_id = 0
+            if len(speed_change.speed_list)-1 < motor_speed_id:
+                motor_speed_id = len(speed_change.speed_list)-1
+            for i in range(len(speed_change.led_pin_list)):
+                GPIO.output(speed_change.led_pin_list[i], i == motor_speed_id)
+            
+            if not speed_change.move: return
+            speed_change.motor_fw_pwm.ChangeDutyCycle(speed_change.speed_list[motor_speed_id])
+        return inner
 
     @staticmethod
     def stop_script(speed_change):
-        print(f"{speed_change.name}:Exiting")
-        speed_change.done.set()
-        speed_change.done = Event()
+        def inner():
+            print(f"{speed_change.name}:Exiting")
+            speed_change.done.set()
+            speed_change.done = Event()
+        return inner

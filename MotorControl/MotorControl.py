@@ -3,10 +3,13 @@ from gpiozero import RotaryEncoder, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
 import RPi.GPIO as GPIO
 import MotorControl.SpeedChange as SpeedChange
+import MotorControl.TimeData as TimeData
 
 GPIO.setmode(GPIO.BCM)
 
 class MotorControl:
+    Factory = PiGPIOFactory()
+
     def __init__(self, name = "control"):
         self.speed_change = SpeedChange(name)
         self.name = name
@@ -29,8 +32,17 @@ class MotorControl:
             pin_led_y1, 
             pin_led_y2, 
             pin_led_y3)
-        self.sw_start = pin_sw_start
-        self.sw_goal  = pin_sw_goal
+        self.pin_sw_start = pin_sw_start
+        self.pin_sw_goal  = pin_sw_goal
+        self.reset()
+    
+    def reset(self):
+        self.start_btn = Button(self.pin_sw_start, pull_up=True, pin_factory=MotorControl.Factory)
+        self.goal_btn  = Button(self.pin_sw_goal , pull_up=True, pin_factory=MotorControl.Factory)
 
     def run(self):
+        # ボタンリリース時の処理
+        func = SpeedChange.stop_script(self)
+        self.goal_btn.when_released = func
+
         self.speed_change.run()
