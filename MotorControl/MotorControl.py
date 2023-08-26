@@ -4,6 +4,8 @@ from gpiozero.pins.pigpio import PiGPIOFactory
 import RPi.GPIO as GPIO
 import MotorControl.SpeedChange as SpeedChange
 import MotorControl.TimeData as TimeData
+from datetime import datetime, timedelta
+from MainWindow import INTERVAL, MainWindow
 
 GPIO.setmode(GPIO.BCM)
 
@@ -42,7 +44,41 @@ class MotorControl:
 
     def run(self):
         # ボタンリリース時の処理
-        func = SpeedChange.stop_script(self)
+        func = MotorControl.start_script(self)
+        self.start_btn.when_released = func
+
+        # ボタンリリース時の処理
+        func = MotorControl.stop_script(self)
         self.goal_btn.when_released = func
 
         self.speed_change.run()
+
+    @staticmethod
+    def start_script(motor_control):
+        def inner():
+            print(f"{motor_control.speed_change.name}:start")
+            
+            # MainWindow.update_time(td)
+            # 計測中でなければ時間計測開始
+            if not motor_control.speed_change.td.start_flag:
+                
+                # 計測中フラグをON
+                motor_control.speed_change.td.start_flag = True
+
+                # 計測開始時刻を取得
+                # start_time = time.time()
+                motor_control.speed_change.td.start_time = datetime.now()
+
+                # update_timeをINTERVAL[ms] 後に実行
+                motor_control.speed_change.td.after_id = MainWindow.Root.after(
+                    INTERVAL, lambda:MainWindow.update_time(motor_control.speed_change.td))
+        return inner
+
+    @staticmethod
+    def stop_script(motor_control):
+        def inner():
+            print(f"{motor_control.speed_change.name}:Exiting")
+            motor_control.speed_change.done.set()
+            motor_control.speed_change.done = Event()
+        return inner
+

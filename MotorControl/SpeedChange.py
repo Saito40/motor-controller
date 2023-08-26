@@ -1,6 +1,7 @@
 from threading import Event
 from gpiozero import RotaryEncoder, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
+from MainWindow import MainWindow
 from MotorControl.MotorControl import MotorControl
 from MotorControl.TimeData import TimeData
 import RPi.GPIO as GPIO
@@ -79,15 +80,8 @@ class SpeedChange:
                 motor_speed_id = len(speed_change.speed_list)-1
             for i in range(len(speed_change.led_pin_list)):
                 GPIO.output(speed_change.led_pin_list[i], i == motor_speed_id)
-            
+            MainWindow.speed_change(speed_change.timedata, motor_speed_id)
+
             if not speed_change.move: return
             speed_change.motor_fw_pwm.ChangeDutyCycle(speed_change.speed_list[motor_speed_id])
-        return inner
-
-    @staticmethod
-    def stop_script(speed_change):
-        def inner():
-            print(f"{speed_change.name}:Exiting")
-            speed_change.done.set()
-            speed_change.done = Event()
         return inner
