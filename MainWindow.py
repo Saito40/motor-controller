@@ -7,7 +7,7 @@ import tkinter.ttk as ttk
 from datetime import datetime, timedelta
 from MotorControl.TimeData import TimeData
 
-WINDOW_SIZE_W = 800
+WINDOW_SIZE_W = 1200
 WINDOW_SIZE_H = 300
 EXIT_KEY = "<Escape>"
 TIMER_FONT = ("", 50, "bold")
@@ -75,14 +75,25 @@ class MainWindow:
             td.progressbar.configure(maximum=300,value=300)
 
             if debug:
+                last = 4
+
                 test = tkinter.Button(
                     self.frame,
-                    text="test"
+                    text="t_start"
                 )
                 test.td = td
                 func = MainWindow.test_start(test)
                 test.config(command=func)
-                test.grid(row=4, column=i, sticky=tkinter.E)
+                test.grid(row=last, column=i, sticky=tkinter.E)
+
+                test = tkinter.Button(
+                    self.frame,
+                    text="t_stop"
+                )
+                test.td = td
+                func = MainWindow.test_stop(test)
+                test.config(command=func)
+                test.grid(row=last+1, column=i, sticky=tkinter.E)
 
         MainWindow.Root.mainloop()
 
@@ -149,6 +160,18 @@ class MainWindow:
         td.progressbar.configure(value = 300)
         # td.progressbar.config(width = 200)
 
+    @staticmethod
+    def test_stop(button):
+        def inner():
+            if not button.td.start_flag: return
+
+            # update_time関数の呼び出しをキャンセル
+            MainWindow.Root.after_cancel(button.td.after_id)
+
+            # 計測中フラグをオフ
+            button.td.start_flag = False
+        return inner
+    
     @staticmethod
     def test_start(button):
         def inner():

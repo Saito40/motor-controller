@@ -71,7 +71,7 @@ def main():
     controlB.speed_change.move = True
     controlA.run()
     controlB.run()
-    main = MainWindow(tds)
+    main = MainWindow([controlA, controlB])
     
 def ckeck():
     pins = [
