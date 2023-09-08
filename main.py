@@ -3,25 +3,25 @@
 
 ## 設定
 # ピン番号
-A_ROTARY_CLK_A_PIN   = 1
-A_ROTARY_DT__B_PIN   = 2
-A_LED_R__PIN         = 3
-A_LED_Y1_PIN         = 4
-A_LED_Y2_PIN         = 5
-A_LED_Y3_PIN         = 6
-A_MOTOR_FW_PIN       = 7
-A_SW_START_PIN       = 8
-A_SW_GOAL_PIN        = 9
+A_ROTARY_CLK_A_PIN   = 27
+A_ROTARY_DT__B_PIN   = 22
+A_LED_R__PIN         = 21
+A_LED_Y1_PIN         = 26
+A_LED_Y2_PIN         = 20
+A_LED_Y3_PIN         = 16
+A_MOTOR_FW_PIN       = 24
+A_SW_START_PIN       = 1
+A_SW_GOAL_PIN        = 7
 
-B_ROTARY_CLK_A_PIN   = 10
-B_ROTARY_DT__B_PIN   = 11
-B_LED_R_PIN          = 12
+B_ROTARY_CLK_A_PIN   = 3
+B_ROTARY_DT__B_PIN   = 2
+B_LED_R_PIN          = 19
 B_LED_Y1_PIN         = 13
-B_LED_Y2_PIN         = 14
-B_LED_Y3_PIN         = 15
+B_LED_Y2_PIN         = 6
+B_LED_Y3_PIN         = 12
 B_MOTOR_FW_PIN       = 16
-B_SW_START_PIN       = 17
-B_SW_GOAL_PIN        = 18
+B_SW_START_PIN       = 8
+B_SW_GOAL_PIN        = 25
 
 # モーターの速度
 # 0 < MOTOR_SPEED < 15(motor=3V) < 100(MAX)
@@ -73,7 +73,7 @@ def main():
     controlB.run()
     main = MainWindow([controlA, controlB])
     
-def ckeck():
+def check():
     pins = [
         A_ROTARY_CLK_A_PIN ,
         A_ROTARY_DT__B_PIN ,
@@ -117,5 +117,5 @@ def ckeck():
                 break
 
 if __name__ == "__main__":
-    ckeck()
+    check()
     main()
