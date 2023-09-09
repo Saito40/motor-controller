@@ -7,7 +7,7 @@ from MotorControl.TimeData import TimeData
 import RPi.GPIO as GPIO
 
 STOP_SPEED = 0.
-PWM_FREQ = 0.5 #Hz
+PWM_FREQ = 1 #Hz
 ROTARY_MAX_STEPS = 200
 
 class SpeedChange:
