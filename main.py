@@ -5,6 +5,7 @@ from setting import *
 from MotorControl.MotorControl import MotorControl
 from MotorControl.SpeedChange import SpeedChange
 from MainWindow import MainWindow
+import RPi.GPIO as GPIO
 
 def main():
     controlA = MotorControl("controlA")
@@ -88,4 +89,11 @@ def check():
 
 if __name__ == "__main__":
     check()
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(e)
+        import sys
+        tb = sys.exc_info()[2]
+        print(e.with_traceback(tb))
+        GPIO.cleanup()
