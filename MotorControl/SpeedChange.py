@@ -2,8 +2,8 @@ from threading import Event
 from gpiozero import RotaryEncoder, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
 from MainWindow import MainWindow
-from MotorControl.MotorControl import MotorControl
 from MotorControl.TimeData import TimeData
+from MotorControl.Factory import FACTORY
 import RPi.GPIO as GPIO
 
 STOP_SPEED = 0.
@@ -48,7 +48,7 @@ class SpeedChange:
         # ロータリーエンコーダ/ボタンのピン設定
         self.rotor = RotaryEncoder(
             self.pin_rotary_a, self.pin_rotary_b, wrap=True, 
-            max_steps=ROTARY_MAX_STEPS, pin_factory=MotorControl.Factory
+            max_steps=ROTARY_MAX_STEPS, pin_factory=FACTORY
         )
         self.rotor.steps = 0
 

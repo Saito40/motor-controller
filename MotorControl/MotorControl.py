@@ -2,16 +2,15 @@ from threading import Event
 from gpiozero import RotaryEncoder, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
 import RPi.GPIO as GPIO
-import MotorControl.SpeedChange as SpeedChange
-import MotorControl.TimeData as TimeData
+from MotorControl.SpeedChange import SpeedChange
+from MotorControl.TimeData import TimeData
+from MotorControl.Factory import FACTORY
 from datetime import datetime, timedelta
 from MainWindow import INTERVAL, MainWindow
 
 GPIO.setmode(GPIO.BCM)
 
 class MotorControl:
-    Factory = PiGPIOFactory()
-
     def __init__(self, name = "control"):
         self.speed_change = SpeedChange(name)
         self.name = name
@@ -39,8 +38,8 @@ class MotorControl:
         self.reset()
     
     def reset(self):
-        self.start_btn = Button(self.pin_sw_start, pull_up=True, pin_factory=MotorControl.Factory)
-        self.goal_btn  = Button(self.pin_sw_goal , pull_up=True, pin_factory=MotorControl.Factory)
+        self.start_btn = Button(self.pin_sw_start, pull_up=True, pin_factory=FACTORY)
+        self.goal_btn  = Button(self.pin_sw_goal , pull_up=True, pin_factory=FACTORY)
 
     def run(self):
         # ボタンリリース時の処理
