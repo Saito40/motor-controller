@@ -42,7 +42,7 @@ def main():
     controlB.speed_change.move = True
     controlA.run()
     controlB.run()
-    main = MainWindow([controlA, controlB])
+    MainWindow([controlA, controlB])
     
 def check():
     pins = [
