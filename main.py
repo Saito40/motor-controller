@@ -91,16 +91,16 @@ if __name__ == "__main__":
     except Exception as e:
         print("ERROR")
         print(e)
-        for pin in [
-            A_LED_R__PIN       ,
-            A_LED_Y1_PIN       ,
-            A_LED_Y2_PIN       ,
-            A_LED_Y3_PIN       ,
-            B_LED_R_PIN        ,
-            B_LED_Y1_PIN       ,
-            B_LED_Y2_PIN       ,
-            B_LED_Y3_PIN       ]:
-            GPIO.setup(pin, GPIO.OUT)
-            GPIO.output(pin, GPIO.LOW)
+    for pin in [
+        A_LED_R__PIN       ,
+        A_LED_Y1_PIN       ,
+        A_LED_Y2_PIN       ,
+        A_LED_Y3_PIN       ,
+        B_LED_R_PIN        ,
+        B_LED_Y1_PIN       ,
+        B_LED_Y2_PIN       ,
+        B_LED_Y3_PIN       ]:
+        GPIO.setup(pin, GPIO.OUT)
+        GPIO.output(pin, GPIO.LOW)
     
     GPIO.cleanup()
