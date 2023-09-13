@@ -69,13 +69,11 @@ def check():
     for i in range(len(pins)):
         for j in range(i+1, len(pins)):
             if pins[i] == pins[j]:
-                print(f"pin number is duplicated {i} {j} {pins[i]}")
-                exit(1)
+                raise Exception(f"pin number is duplicated {i} {j} {pins[i]}")
 
     # モーターの速度チェック
     if MOTOR_LOW_SPEED > MOTOR_HIGH_SPEED:
-        print(f"MOTOR_LOW_SPEED > MOTOR_HIGH_SPEED")
-        exit(1)
+        raise Exception(f"MOTOR_LOW_SPEED > MOTOR_HIGH_SPEED")
     
     if MOTOR_HIGH_SPEED < 15:
         print("MOTOR_HIGH_SPEED < 15")
@@ -89,11 +87,20 @@ def check():
 
 if __name__ == "__main__":
     check()
-    try:
-        main()
+    try: main()
     except Exception as e:
+        print("ERROR")
         print(e)
-        import sys
-        tb = sys.exc_info()[2]
-        print(e.with_traceback(tb))
-        GPIO.cleanup()
+        for pin in [
+            A_LED_R__PIN       ,
+            A_LED_Y1_PIN       ,
+            A_LED_Y2_PIN       ,
+            A_LED_Y3_PIN       ,
+            B_LED_R_PIN        ,
+            B_LED_Y1_PIN       ,
+            B_LED_Y2_PIN       ,
+            B_LED_Y3_PIN       ]:
+            GPIO.setup(pin, GPIO.OUT)
+            GPIO.output(pin, GPIO.LOW)
+    
+    GPIO.cleanup()

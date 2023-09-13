@@ -70,7 +70,7 @@ class MainWindow:
 
             td.progressbar = ttk.Progressbar(
                 self.frame, orient="horizontal",
-                length=300, mode="determinate", style="Horizontal.TProgressbar")
+                length=300, mode="determinate")#, style="Horizontal.TProgressbar")
             td.progressbar.grid(row=3, column=i)
             td.progressbar.configure(maximum=300,value=300)
 
@@ -121,6 +121,7 @@ class MainWindow:
     
     @staticmethod
     def update_time(td: TimeData):
+        if not td.start_flag: return
 
         # update_time関数を再度INTERVAL[ms]後に実行
         td.after_id = MainWindow.Root.after(INTERVAL, lambda:MainWindow.update_time(td))

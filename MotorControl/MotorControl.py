@@ -57,27 +57,28 @@ class MotorControl:
         def inner():
             print(f"{motor_control.speed_change.name}:start")
             
-            # MainWindow.update_time(td)
+            # MainWindow.update_time(timedata)
             # 計測中でなければ時間計測開始
-            if not motor_control.speed_change.td.start_flag:
+            if not motor_control.speed_change.timedata.start_flag:
                 
                 # 計測中フラグをON
-                motor_control.speed_change.td.start_flag = True
+                motor_control.speed_change.timedata.start_flag = True
 
                 # 計測開始時刻を取得
                 # start_time = time.time()
-                motor_control.speed_change.td.start_time = datetime.now()
+                motor_control.speed_change.timedata.start_time = datetime.now()
 
                 # update_timeをINTERVAL[ms] 後に実行
-                motor_control.speed_change.td.after_id = MainWindow.Root.after(
-                    INTERVAL, lambda:MainWindow.update_time(motor_control.speed_change.td))
+                motor_control.speed_change.timedata.after_id = MainWindow.Root.after(
+                    INTERVAL, lambda:MainWindow.update_time(motor_control.speed_change.timedata))
         return inner
 
     @staticmethod
     def stop_script(motor_control):
         def inner():
             print(f"{motor_control.speed_change.name}:Exiting")
-            motor_control.speed_change.done.set()
-            motor_control.speed_change.done = Event()
+            motor_control.speed_change.timedata.start_flag = False
+            # motor_control.speed_change.done.set()
+            # motor_control.speed_change.done = Event()
         return inner
 

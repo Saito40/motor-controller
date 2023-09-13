@@ -1,10 +1,12 @@
-from threading import Event
+# from threading import Event
 from gpiozero import RotaryEncoder, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
 from MainWindow import MainWindow
 from MotorControl.TimeData import TimeData
 from MotorControl.Factory import FACTORY
 import RPi.GPIO as GPIO
+# import pigpio
+# pi = pigpio.pi()
 
 STOP_SPEED = 0.
 PWM_FREQ = 1 #Hz
@@ -59,7 +61,7 @@ class SpeedChange:
         func = SpeedChange.change_rotor(self)
         self.rotor.when_rotated = func
         
-        self.done.wait()
+        # self.done.wait()
 
     @staticmethod
     def set_motor_speed(hi_speed: float, low_speed: float, speed_step: int):
@@ -78,10 +80,13 @@ class SpeedChange:
                 motor_speed_id = 0
             if len(speed_change.speed_list)-1 < motor_speed_id:
                 motor_speed_id = len(speed_change.speed_list)-1
-            for i in range(len(speed_change.led_pin_list)):
-                GPIO.output(speed_change.led_pin_list[i], i == motor_speed_id)
+            for i, pin in enumerate(speed_change.led_pin_list):
+                GPIO.output(pin, i == motor_speed_id)
             MainWindow.speed_change(speed_change.timedata, motor_speed_id)
 
             if not speed_change.move: return
+            # duty = speed_change.speed_list[motor_speed_id]
+            # duty = int((duty * 1000000 / 100))
+            # pi.hardware_PWM(speed_change.pin_motor_fw, PWM_FREQ, duty)
             speed_change.motor_fw_pwm.ChangeDutyCycle(speed_change.speed_list[motor_speed_id])
         return inner
