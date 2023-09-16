@@ -3,10 +3,11 @@ from gpiozero import RotaryEncoder, Button
 from gpiozero.pins.pigpio import PiGPIOFactory
 import RPi.GPIO as GPIO
 from MotorControl.SpeedChange import SpeedChange
-from MotorControl.TimeData import TimeData
+from MotorControl.TimeData import TimeData, TimeMain
 from MotorControl.Factory import FACTORY
 from datetime import datetime, timedelta
 from MainWindow import INTERVAL, MainWindow
+from setting import *
 
 GPIO.setmode(GPIO.BCM)
 
@@ -23,8 +24,8 @@ class MotorControl:
                 pin_led_y2: int,
                 pin_led_y3: int,
                 pin_motor_fw: int,
-                pin_sw_start: int = None,
-                pin_sw_goal: int = None):
+                # pin_sw_start: int = None,
+                pin_sw_rap: int = None):
         self.speed_change.set_pins(
             pin_rotary_a, 
             pin_rotary_b, 
@@ -33,22 +34,22 @@ class MotorControl:
             pin_led_y1, 
             pin_led_y2, 
             pin_led_y3)
-        self.pin_sw_start = pin_sw_start
-        self.pin_sw_goal  = pin_sw_goal
+        # self.pin_sw_start = pin_sw_start
+        self.pin_sw_rap  = pin_sw_rap
         self.reset()
     
     def reset(self):
-        self.start_btn = Button(self.pin_sw_start, pull_up=True, pin_factory=FACTORY)
-        self.goal_btn  = Button(self.pin_sw_goal , pull_up=True, pin_factory=FACTORY)
+        # self.start_btn = Button(self.pin_sw_start, pull_up=True, pin_factory=FACTORY)
+        self.rap_btn  = Button(self.pin_sw_rap , pull_up=True, pin_factory=FACTORY)
 
-    def run(self):
-        # ボタンリリース時の処理
-        func = MotorControl.start_script(self)
-        self.start_btn.when_released = func
+    def run(self, time_main: TimeMain):
+        # # ボタンリリース時の処理
+        # func = MotorControl.start_script(self)
+        # self.start_btn.when_released = func
 
         # ボタンリリース時の処理
-        func = MotorControl.stop_script(self)
-        self.goal_btn.when_released = func
+        func = MotorControl.rap_script(self, time_main)
+        self.rap_btn.when_released = func
 
         self.speed_change.run()
 
@@ -74,11 +75,32 @@ class MotorControl:
         return inner
 
     @staticmethod
-    def stop_script(motor_control):
+    def rap_script(motor_control, timemain: TimeMain):
         def inner():
-            print(f"{motor_control.speed_change.name}:Exiting")
-            motor_control.speed_change.timedata.start_flag = False
-            # motor_control.speed_change.done.set()
-            # motor_control.speed_change.done = Event()
+            if not timemain.start_flag: return
+            
+            timedata = motor_control.speed_change.timedata
+            if not timedata.start_flag: return
+            rap_count = len(timedata.rap_times)
+            if rap_count <= RAP_COUNT:
+                time = datetime.now() - timemain.start_time
+                if rap_count!=0:
+                    time = time - sum(timedata.rap_times, timedelta(0))
+                timedata.rap_times.append(time)
+                timedata.rap_labels[rap_count].config(
+                    text=rap_time_label_format(rap_count+1, MainWindow.time_to_str(time)))
+
+            if RAP_COUNT <= len(timedata.rap_times):
+                timedata.start_flag = False
+                timedata.sum_label.config(
+                    text=sum_time_label_format(
+                        MainWindow.time_to_str(
+                            sum(timedata.rap_times, timedelta(0))
+                        )
+                    )
+                )
+                
+            if all([(not timedata.start_flag) for timedata in timemain.time_data_list]):
+                timemain.start_flag = False
         return inner
 

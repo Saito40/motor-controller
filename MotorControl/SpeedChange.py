@@ -7,10 +7,7 @@ from MotorControl.Factory import FACTORY
 import RPi.GPIO as GPIO
 # import pigpio
 # pi = pigpio.pi()
-
-STOP_SPEED = 0.
-PWM_FREQ = 1 #Hz
-ROTARY_MAX_STEPS = 200
+from setting import *
 
 class SpeedChange:
     speed_list = [STOP_SPEED]

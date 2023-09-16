@@ -5,9 +5,11 @@ from setting import *
 from MotorControl.MotorControl import MotorControl
 from MotorControl.SpeedChange import SpeedChange
 from MainWindow import MainWindow
+from MotorControl.TimeData import TimeMain
 import RPi.GPIO as GPIO
 
 def main():
+
     controlA = MotorControl("controlA")
     controlB = MotorControl("controlB")
 
@@ -21,8 +23,7 @@ def main():
         A_LED_Y2_PIN      , 
         A_LED_Y3_PIN      , 
         A_MOTOR_FW_PIN    , 
-        A_SW_START_PIN    , 
-        A_SW_GOAL_PIN     )
+        A_SW_RAP_PIN      )
 
     controlB.set_pins(
         B_ROTARY_CLK_A_PIN, 
@@ -32,16 +33,17 @@ def main():
         B_LED_Y2_PIN      , 
         B_LED_Y3_PIN      , 
         B_MOTOR_FW_PIN    , 
-        B_SW_START_PIN    , 
-        B_SW_GOAL_PIN     )
+        B_SW_RAP_PIN      )
     
-    # ディスプレイ表示
+    time_main = TimeMain([])
 
     # モーター制御
     controlA.speed_change.move = True
     controlB.speed_change.move = True
-    controlA.run()
-    controlB.run()
+    controlA.run(time_main)
+    controlB.run(time_main)
+
+    # ディスプレイ表示
     MainWindow([controlA, controlB])
     
 def check():
@@ -53,8 +55,7 @@ def check():
         A_LED_Y2_PIN       ,
         A_LED_Y3_PIN       ,
         A_MOTOR_FW_PIN     ,
-        A_SW_START_PIN     ,
-        A_SW_GOAL_PIN      ,
+        A_SW_RAP_PIN      ,
         B_ROTARY_CLK_A_PIN ,
         B_ROTARY_DT__B_PIN ,
         B_LED_R_PIN        ,
@@ -62,8 +63,7 @@ def check():
         B_LED_Y2_PIN       ,
         B_LED_Y3_PIN       ,
         B_MOTOR_FW_PIN     ,
-        B_SW_START_PIN     ,
-        B_SW_GOAL_PIN      ]
+        B_SW_RAP_PIN       ]
     
     # ピン番号の重複チェック
     for i in range(len(pins)):

@@ -5,22 +5,8 @@ from tkinter import messagebox
 import tkinter.ttk as ttk
 # import time
 from datetime import datetime, timedelta
-from MotorControl.TimeData import TimeData
-
-WINDOW_SIZE_W = 1200
-WINDOW_SIZE_H = 300
-EXIT_KEY = "<Escape>"
-TIMER_FONT = ("", 50, "bold")
-PAD_X = 20
-
-LABEL_ON_ = "●"
-LABEL_OFF = "◌"
-ONOFF_FONT = ("", 20, "bold")
-
-X00_00_000 = "00:00.000"
-
-# ラベルを更新する間隔[ms]
-INTERVAL = 10
+from MotorControl.TimeData import TimeData, TimeMain
+from setting import *
 
 window_size = str(WINDOW_SIZE_W) + "x" + str(WINDOW_SIZE_H)
 
@@ -28,33 +14,47 @@ class MainWindow:
     Root = tkinter.Tk()
 
     def __init__(self, MotorControlList: list, debug = False):
+        
         MainWindow.Root.title("スロットカー")
         MainWindow.Root.geometry(window_size)
         # MainWindow.Root.resizable(False, False)
         MainWindow.Root.bind("<Escape>", MainWindow.exit_key_event)
         MainWindow.Root.protocol("WM_DELETE_WINDOW", MainWindow.exit_key_event)
+        self.time_main = TimeMain([])
         self.frame = tkinter.Frame(MainWindow.Root)
         self.frame.pack()
+
+        row_counter = 0
+
+        self.start_button = tkinter.Button(
+            self.frame,
+            text="start"
+        )
+        func = MainWindow.start(self.time_main)
+        self.start_button.config(command=func)
+
+        self.start_button.grid(row=row_counter, column=0, columnspan=2, sticky=tkinter.E)
+        row_counter += 1
+
+        timer_label = tkinter.Label(
+            self.frame,
+            # text=X00_00_000,
+            font=TIMER_FONT,
+        )
+        timer_label.grid(row=row_counter, column=0, columnspan=2, padx=PAD_X, pady=10)
+        row_counter += 1
+        self.time_main.label = timer_label
+        
+        cache = row_counter
         for i, td in enumerate([mc.speed_change.timedata for mc in MotorControlList]):
+            self.time_main.time_data_list.append(td)
+            # td.start_flag = True
 
-            button = tkinter.Button(
-                self.frame,
-                text="retire"
-            )
-            button.td = td
-            func = MainWindow.retire(button)
-            button.config(command=func)
-            button.grid(row=0, column=i, sticky=tkinter.E)
-
-            td.label = tkinter.Label(
-                self.frame,
-                text=X00_00_000,
-                font=TIMER_FONT,
-            )
-            td.label.grid(row=1, column=i, padx=PAD_X, pady=10)
-
+            row_counter = cache
+            
             min_frame = tkinter.Frame(self.frame)
-            min_frame.grid(row=2, column=i, sticky=tkinter.W)
+            min_frame.grid(row=row_counter, column=i, sticky=tkinter.W)
+            row_counter += 1
 
             colors = ["red", "green", "green", "green"]
             onoff = [LABEL_ON_, LABEL_OFF, LABEL_OFF, LABEL_OFF]
@@ -65,36 +65,40 @@ class MainWindow:
                     font=ONOFF_FONT,
                     fg = colors[j]
                 )
-                speed_label.grid(row=0, column=j)
+                speed_label.grid(row=0, column=j, sticky=tkinter.W)
                 td.speed_label_list.append(speed_label)
 
-            td.progressbar = ttk.Progressbar(
-                self.frame, orient="horizontal",
-                length=300, mode="determinate")#, style="Horizontal.TProgressbar")
-            td.progressbar.grid(row=3, column=i)
-            td.progressbar.configure(maximum=300,value=300)
+            td.rap_labels = []
+            for j in range(1, RAP_COUNT+1):
+                rap_label = tkinter.Label(
+                    self.frame,
+                    # text=rap_time_label_format(j, X00_00_000),
+                    font=RAP_FONT,
+                )
+                rap_label.grid(row=row_counter, column=i, padx=PAD_X, pady=0, sticky=tkinter.E)
+                td.rap_labels.append(rap_label)
+                row_counter += 1
+            
+            sum_label = tkinter.Label(
+                self.frame,
+                font=RAP_FONT,
+            )
+            sum_label.grid(row=row_counter, column=i, padx=PAD_X, pady=0, sticky=tkinter.E)
+            td.sum_label = sum_label
+            row_counter += 1
 
             if debug:
-                last = 4
-
                 test = tkinter.Button(
                     self.frame,
-                    text="t_start"
+                    text="t_rap&stop"
                 )
-                test.td = td
-                func = MainWindow.test_start(test)
+                func = MainWindow.test_rap_and_stop(td, self.time_main)
                 test.config(command=func)
-                test.grid(row=last, column=i, sticky=tkinter.E)
+                test.grid(row=row_counter, column=i, sticky=tkinter.E)
+                row_counter += 1
 
-                test = tkinter.Button(
-                    self.frame,
-                    text="t_stop"
-                )
-                test.td = td
-                func = MainWindow.test_stop(test)
-                test.config(command=func)
-                test.grid(row=last+1, column=i, sticky=tkinter.E)
-
+        MainWindow.reset(self.time_main)
+        
         MainWindow.Root.mainloop()
 
     @staticmethod
@@ -116,15 +120,15 @@ class MainWindow:
 
             # 計測中フラグをオフ
             button.td.start_flag = False
-            MainWindow.reset_label(button.td)
+            MainWindow.reset(button.td)
         return inner
     
     @staticmethod
-    def update_time(td: TimeData):
-        if not td.start_flag: return
+    def update_time(timemain: TimeMain):
+        if not timemain.start_flag: return
 
         # update_time関数を再度INTERVAL[ms]後に実行
-        td.after_id = MainWindow.Root.after(INTERVAL, lambda:MainWindow.update_time(td))
+        timemain.after_id = MainWindow.Root.after(INTERVAL, lambda:MainWindow.update_time(timemain))
         # print(sw_class.after_id)
 
         # 現在の時刻を取得
@@ -132,63 +136,89 @@ class MainWindow:
         now_time = datetime.now()
 
         # 現在の時刻と計測開始時刻の差から計測時間計算
-        elapsed_time = now_time - td.start_time
+        elapsed_time = now_time - timemain.start_time
 
+        elapsed_time_str = MainWindow.time_to_str(elapsed_time)
+        
+        # 計測時間を表示
+        timemain.label.config(text=elapsed_time_str)
+        # td.progressbar.config(width = 200-elapsed_time.seconds*20)
+
+    @staticmethod
+    def time_to_str(time_delta: timedelta):
         # 表示したい形式に変換（小数点第２位までに変換）
-        mm, ss = divmod(elapsed_time.seconds, 60)
+        mm, ss = divmod(time_delta.seconds, 60)
         hh, mm = divmod(mm, 60)
         if 0 < hh:
             raise Exception("時間がオーバーしました")
         s = "%02d:%02d" % (mm, ss)
-        if elapsed_time.days:
+        if time_delta.days:
             def plural(n):
                 return n, abs(n) != 1 and "s" or ""
-            s = ("%d day%s, " % plural(elapsed_time.days)) + s
-        if elapsed_time.microseconds:
-            s = s + ".%03d" % (elapsed_time.microseconds / 1000)
+            s = ("%d day%s, " % plural(time_delta.days)) + s
+        if time_delta.microseconds:
+            s = s + ".%03d" % (time_delta.microseconds / 1000)
+        return s
 
-        elapsed_time_str = s
-        
-        # 計測時間を表示
-        td.label.config(text=elapsed_time_str)
-        td.progressbar.configure(value = 300-elapsed_time.seconds*30)
-        td.progressbar.update()
-        # td.progressbar.config(width = 200-elapsed_time.seconds*20)
 
     @staticmethod
-    def reset_label(td: TimeData):
-        td.label.config(text=X00_00_000)
-        td.progressbar.configure(value = 300)
-        # td.progressbar.config(width = 200)
+    def reset(timemain: TimeMain):
+        timemain.label.config(text=X00_00_000)
+        for td in timemain.time_data_list:
+            td.start_flag = True
+            for i, rap_label in enumerate(td.rap_labels):
+                rap_label.config(text=rap_time_label_format(i+1, X00_00_000))
+            td.sum_label.config(text=sum_time_label_format(X00_00_000))
+            td.rap_times = []
 
     @staticmethod
-    def test_stop(button):
+    def test_rap_and_stop(timedata: TimeData, timemain: TimeMain):
         def inner():
-            if not button.td.start_flag: return
+            if not timemain.start_flag: return
 
-            # update_time関数の呼び出しをキャンセル
-            MainWindow.Root.after_cancel(button.td.after_id)
+            if not timedata.start_flag: return
+            rap_count = len(timedata.rap_times)
+            if rap_count <= RAP_COUNT:
+                time = datetime.now() - timemain.start_time
+                if rap_count!=0:
+                    time = time - sum(timedata.rap_times, timedelta(0))
+                timedata.rap_times.append(time)
+                timedata.rap_labels[rap_count].config(
+                    text=rap_time_label_format(rap_count+1, MainWindow.time_to_str(time)))
 
-            # 計測中フラグをオフ
-            button.td.start_flag = False
+            if RAP_COUNT <= len(timedata.rap_times):
+                timedata.start_flag = False
+                timedata.sum_label.config(
+                    text=sum_time_label_format(
+                        MainWindow.time_to_str(
+                            sum(timedata.rap_times, timedelta(0))
+                        )
+                    )
+                )
+                
+            if all([(not timedata.start_flag) for timedata in timemain.time_data_list]):
+                timemain.start_flag = False
         return inner
     
     @staticmethod
-    def test_start(button):
+    def start(timemain: TimeMain):
         def inner():
             # MainWindow.update_time(td)
             # 計測中でなければ時間計測開始
-            if button.td.start_flag: return
+            # if timemain.start_flag:
+            res = messagebox.askyesno(title = "確認", message = "初めますか？")
+            if not res: return
                 
             # 計測中フラグをON
-            button.td.start_flag = True
+            timemain.start_flag = True
 
             # 計測開始時刻を取得
             # start_time = time.time()
-            button.td.start_time = datetime.now()
+            timemain.start_time = datetime.now()
+            MainWindow.reset(timemain)
 
             # update_timeをINTERVAL[ms] 後に実行
-            button.td.after_id = MainWindow.Root.after(INTERVAL, lambda:MainWindow.update_time(button.td))
+            timemain.after_id = MainWindow.Root.after(INTERVAL, lambda:MainWindow.update_time(timemain))
         return inner
 
     @staticmethod
@@ -212,5 +242,5 @@ if __name__ == "__main__":
         mc(),
         mc(),
     ]
-    main = MainWindow(tds, debug = True)
+    MainWindow(tds, debug = True)
 
