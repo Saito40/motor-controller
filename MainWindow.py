@@ -222,7 +222,7 @@ class MainWindow:
             for td in main_window.time_main.time_data_list:
                 td.move = True
             for mc in main_window.motor_control_list:
-                mc.speed_change.rotor.when_rotate()
+                mc.speed_change.rotor.when_rotated()
 
             # update_timeをINTERVAL[ms] 後に実行
             main_window.time_main.after_id = MainWindow.Root.after(
@@ -243,7 +243,7 @@ if __name__ == "__main__":
     class sp:
         def __init__(self):
             self.timedata = TimeData()
-            self.rotor.when_rotate = lambda: print("rotor")
+            self.rotor.when_rotated = lambda: print("rotor")
             self.move = False
     class mc:
         def __init__(self):
