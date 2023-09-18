@@ -38,13 +38,11 @@ def main():
     time_main = TimeMain([])
 
     # モーター制御
-    controlA.speed_change.move = True
-    controlB.speed_change.move = True
     controlA.run(time_main)
     controlB.run(time_main)
 
     # ディスプレイ表示
-    MainWindow([controlA, controlB])
+    MainWindow([controlA, controlB], time_main)
     
 def check():
     pins = [

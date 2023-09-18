@@ -51,7 +51,7 @@ class MotorControl:
         func = MotorControl.rap_script(self, time_main)
         self.rap_btn.when_released = func
 
-        self.speed_change.run()
+        # self.speed_change.run()
 
     @staticmethod
     def start_script(motor_control):
@@ -82,13 +82,13 @@ class MotorControl:
             timedata = motor_control.speed_change.timedata
             if not timedata.start_flag: return
             rap_count = len(timedata.rap_times)
-            if rap_count <= RAP_COUNT:
-                time = datetime.now() - timemain.start_time
-                if rap_count!=0:
-                    time = time - sum(timedata.rap_times, timedelta(0))
-                timedata.rap_times.append(time)
-                timedata.rap_labels[rap_count].config(
-                    text=rap_time_label_format(rap_count+1, MainWindow.time_to_str(time)))
+            time = datetime.now() - timemain.start_time
+            if rap_count!=0:
+                time = time - sum(timedata.rap_times, timedelta(0))
+            if time < timedelta(seconds=TIME_SPAN): return
+            timedata.rap_times.append(time)
+            timedata.rap_labels[rap_count].config(
+                text=rap_time_label_format(rap_count+1, MainWindow.time_to_str(time)))
 
             if RAP_COUNT <= len(timedata.rap_times):
                 timedata.start_flag = False

@@ -13,14 +13,15 @@ window_size = str(WINDOW_SIZE_W) + "x" + str(WINDOW_SIZE_H)
 class MainWindow:
     Root = tkinter.Tk()
 
-    def __init__(self, MotorControlList: list, debug = False):
+    def __init__(self, motor_control_list: list, time_main: TimeMain, debug = False):
         
         MainWindow.Root.title("スロットカー")
         MainWindow.Root.geometry(window_size)
         # MainWindow.Root.resizable(False, False)
         MainWindow.Root.bind("<Escape>", MainWindow.exit_key_event)
         MainWindow.Root.protocol("WM_DELETE_WINDOW", MainWindow.exit_key_event)
-        self.time_main = TimeMain([])
+        self.motor_control_list = motor_control_list
+        self.time_main = time_main
         self.frame = tkinter.Frame(MainWindow.Root)
         self.frame.pack()
 
@@ -30,7 +31,7 @@ class MainWindow:
             self.frame,
             text="start"
         )
-        func = MainWindow.start(self.time_main)
+        func = MainWindow.start(self)
         self.start_button.config(command=func)
 
         self.start_button.grid(row=row_counter, column=0, columnspan=2, sticky=tkinter.E)
@@ -46,7 +47,7 @@ class MainWindow:
         self.time_main.label = timer_label
         
         cache = row_counter
-        for i, td in enumerate([mc.speed_change.timedata for mc in MotorControlList]):
+        for i, td in enumerate([mc.speed_change.timedata for mc in motor_control_list]):
             self.time_main.time_data_list.append(td)
             # td.start_flag = True
 
@@ -125,11 +126,11 @@ class MainWindow:
     
     @staticmethod
     def update_time(timemain: TimeMain):
-        if not timemain.start_flag: return
 
         # update_time関数を再度INTERVAL[ms]後に実行
         timemain.after_id = MainWindow.Root.after(INTERVAL, lambda:MainWindow.update_time(timemain))
         # print(sw_class.after_id)
+        if not timemain.start_flag: return
 
         # 現在の時刻を取得
         # now_time = time.time()
@@ -163,9 +164,11 @@ class MainWindow:
 
     @staticmethod
     def reset(timemain: TimeMain):
+        timemain.start_flag = False
         timemain.label.config(text=X00_00_000)
         for td in timemain.time_data_list:
             td.start_flag = True
+            td.move = False
             for i, rap_label in enumerate(td.rap_labels):
                 rap_label.config(text=rap_time_label_format(i+1, X00_00_000))
             td.sum_label.config(text=sum_time_label_format(X00_00_000))
@@ -201,7 +204,7 @@ class MainWindow:
         return inner
     
     @staticmethod
-    def start(timemain: TimeMain):
+    def start(main_window):
         def inner():
             # MainWindow.update_time(td)
             # 計測中でなければ時間計測開始
@@ -209,16 +212,21 @@ class MainWindow:
             res = messagebox.askyesno(title = "確認", message = "初めますか？")
             if not res: return
                 
+            MainWindow.reset(main_window.time_main)
             # 計測中フラグをON
-            timemain.start_flag = True
+            main_window.time_main.start_flag = True
 
             # 計測開始時刻を取得
             # start_time = time.time()
-            timemain.start_time = datetime.now()
-            MainWindow.reset(timemain)
+            main_window.time_main.start_time = datetime.now()
+            for td in main_window.time_main.time_data_list:
+                td.move = True
+            for mc in main_window.motor_control_list:
+                mc.speed_change.rotor.when_rotate()
 
             # update_timeをINTERVAL[ms] 後に実行
-            timemain.after_id = MainWindow.Root.after(INTERVAL, lambda:MainWindow.update_time(timemain))
+            main_window.time_main.after_id = MainWindow.Root.after(
+                INTERVAL, lambda:MainWindow.update_time(main_window.time_main))
         return inner
 
     @staticmethod
@@ -235,6 +243,8 @@ if __name__ == "__main__":
     class sp:
         def __init__(self):
             self.timedata = TimeData()
+            self.rotor.when_rotate = lambda: print("rotor")
+            self.move = False
     class mc:
         def __init__(self):
             self.speed_change = sp()
@@ -242,5 +252,5 @@ if __name__ == "__main__":
         mc(),
         mc(),
     ]
-    MainWindow(tds, debug = True)
+    MainWindow(tds, TimeMain([]), debug = True)
 

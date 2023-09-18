@@ -16,7 +16,7 @@ B_LED_Y1_PIN         = 13
 B_LED_Y2_PIN         = 6
 B_LED_Y3_PIN         = 12
 B_MOTOR_FW_PIN       = 23
-B_SW_RAP_PIN         = 15
+B_SW_RAP_PIN         = 18
 
 # モーターの速度
 # 0 < MOTOR_SPEED < 15(motor=3V) < 100(MAX)
@@ -24,7 +24,7 @@ MOTOR_LOW_SPEED  = 10
 MOTOR_HIGH_SPEED = 100
 MOTOR_SPEED_STEP = 3
 RAP_COUNT = 3
-
+TIME_SPAN = 1
 
 WINDOW_SIZE_W = 600
 WINDOW_SIZE_H = 400

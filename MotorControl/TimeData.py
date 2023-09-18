@@ -29,3 +29,4 @@ class TimeData:
         self.rap_times = []
         self.rap_labels = []
         self.sum_label = sum_label
+        self.move = False

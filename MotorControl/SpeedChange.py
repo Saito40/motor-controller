@@ -51,9 +51,6 @@ class SpeedChange:
         )
         self.rotor.steps = 0
 
-    
-    def run(self):
-    
         # ロータリーエンコーダ変化時の処理
         func = SpeedChange.change_rotor(self)
         self.rotor.when_rotated = func
@@ -81,7 +78,7 @@ class SpeedChange:
                 GPIO.output(pin, i == motor_speed_id)
             MainWindow.speed_change(speed_change.timedata, motor_speed_id)
 
-            if not speed_change.move: return
+            if not speed_change.timedata.move: return
             # duty = speed_change.speed_list[motor_speed_id]
             # duty = int((duty * 1000000 / 100))
             # pi.hardware_PWM(speed_change.pin_motor_fw, PWM_FREQ, duty)
