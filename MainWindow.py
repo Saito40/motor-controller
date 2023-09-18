@@ -240,10 +240,13 @@ class MainWindow:
 
 
 if __name__ == "__main__":
+    class rotor:
+        def __init__(self):
+            self.when_rotated = lambda: print("rotor")
     class sp:
         def __init__(self):
             self.timedata = TimeData()
-            self.rotor.when_rotated = lambda: print("rotor")
+            self.rotor = rotor()
             self.move = False
     class mc:
         def __init__(self):
