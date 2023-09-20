@@ -1,6 +1,4 @@
 # from threading import Event
-from gpiozero import RotaryEncoder, Button
-from gpiozero.pins.pigpio import PiGPIOFactory
 from MainWindow import MainWindow
 from MotorControl.TimeData import TimeData
 from MotorControl.Factory import FACTORY
@@ -8,9 +6,20 @@ import RPi.GPIO as GPIO
 # import pigpio
 # pi = pigpio.pi()
 from setting import *
+import spidev
 
 class SpeedChange:
     speed_list = [STOP_SPEED]
+    #SPI通信を行うための準備
+    spi = spidev.SpiDev()               #インスタンスを生成
+    spi.open(0, 0)                      #CE0(24番ピン)を指定
+    spi.max_speed_hz = MAX_SPEED_HZ          #転送速度 1MHz
+    volume_separate = []
+    _volume_min = VOLUME_SPEED_MIN_DEG / VOLUME_MAX_DEG * VOLUME_MAX
+    _volume_max = VOLUME_SPEED_MAX_DEG / VOLUME_MAX_DEG * VOLUME_MAX
+    _volume_d_4 = (_volume_min - _volume_max)/4
+    for i in range(MOTOR_SPEED_STEP):
+        volume_separate.append(i * _volume_d_4 + _volume_max)
 
     def __init__(self, name = "changer"):
         self.name = name
@@ -44,18 +53,7 @@ class SpeedChange:
             GPIO.setup(pin, GPIO.OUT)
         GPIO.output(self.led_pin_list[0], True)
 
-        # ロータリーエンコーダ/ボタンのピン設定
-        self.rotor = RotaryEncoder(
-            self.pin_rotary_a, self.pin_rotary_b, wrap=True, 
-            max_steps=ROTARY_MAX_STEPS, pin_factory=FACTORY
-        )
-        self.rotor.steps = 0
-
-        # ロータリーエンコーダ変化時の処理
-        func = SpeedChange.change_rotor(self)
-        self.rotor.when_rotated = func
-        
-        # self.done.wait()
+        self.volume_func = SpeedChange.change_rotor(self)
 
     @staticmethod
     def set_motor_speed(hi_speed: float, low_speed: float, speed_step: int):
@@ -84,3 +82,35 @@ class SpeedChange:
             # pi.hardware_PWM(speed_change.pin_motor_fw, PWM_FREQ, duty)
             speed_change.motor_fw_pwm.ChangeDutyCycle(speed_change.speed_list[motor_speed_id])
         return inner
+    
+    @staticmethod
+    def check_volume(speed_change):
+        def inner():
+
+            resp = SpeedChange.spi.xfer2([0x68, 0x00])               #SPI通信で値を読み込む
+            volume = ((resp[0] << 8) + resp[1]) & 0x3FF  #読み込んだ値を10ビットの数値に変換
+            
+            motor_speed_id = 0
+            if volume < SpeedChange.volume_separate[0]:
+                motor_speed_id = 0
+            else:
+                for i in range(len(SpeedChange.volume_separate)-1):
+                    if SpeedChange.volume_separate[i] <= volume and volume < SpeedChange.volume_separate[i+1]:
+                        motor_speed_id = i+1
+                        break
+                else:
+                    motor_speed_id = MOTOR_SPEED_STEP-1
+
+            print(f"{speed_change.name}: motor_speed_id is {motor_speed_id}")
+            
+            for i, pin in enumerate(speed_change.led_pin_list):
+                GPIO.output(pin, i == motor_speed_id)
+            MainWindow.speed_change(speed_change.timedata, motor_speed_id)
+
+            if not speed_change.timedata.move: return
+            # duty = speed_change.speed_list[motor_speed_id]
+            # duty = int((duty * 1000000 / 100))
+            # pi.hardware_PWM(speed_change.pin_motor_fw, PWM_FREQ, duty)
+            speed_change.motor_fw_pwm.ChangeDutyCycle(speed_change.speed_list[motor_speed_id])
+        return inner
+
