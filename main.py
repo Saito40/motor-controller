@@ -16,8 +16,6 @@ def main():
     SpeedChange.set_motor_speed(MOTOR_HIGH_SPEED, MOTOR_LOW_SPEED, MOTOR_SPEED_STEP)
 
     controlA.set_pins(
-        A_ROTARY_CLK_A_PIN, 
-        A_ROTARY_DT__B_PIN, 
         A_LED_R__PIN      , 
         A_LED_Y1_PIN      , 
         A_LED_Y2_PIN      , 
@@ -26,8 +24,6 @@ def main():
         A_SW_RAP_PIN      )
 
     controlB.set_pins(
-        B_ROTARY_CLK_A_PIN, 
-        B_ROTARY_DT__B_PIN, 
         B_LED_R_PIN       , 
         B_LED_Y1_PIN      , 
         B_LED_Y2_PIN      , 
@@ -46,22 +42,19 @@ def main():
     
 def check():
     pins = [
-        A_ROTARY_CLK_A_PIN ,
-        A_ROTARY_DT__B_PIN ,
         A_LED_R__PIN       ,
         A_LED_Y1_PIN       ,
         A_LED_Y2_PIN       ,
         A_LED_Y3_PIN       ,
         A_MOTOR_FW_PIN     ,
         A_SW_RAP_PIN      ,
-        B_ROTARY_CLK_A_PIN ,
-        B_ROTARY_DT__B_PIN ,
         B_LED_R_PIN        ,
         B_LED_Y1_PIN       ,
         B_LED_Y2_PIN       ,
         B_LED_Y3_PIN       ,
         B_MOTOR_FW_PIN     ,
         B_SW_RAP_PIN       ]
+    pins.extend(SPI_PIN)
     
     # ピン番号の重複チェック
     for i in range(len(pins)):

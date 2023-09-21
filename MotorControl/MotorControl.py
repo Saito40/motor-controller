@@ -15,24 +15,18 @@ class MotorControl:
         self.name = name
     
     def set_pins(self, 
-                pin_rotary_a: int,
-                pin_rotary_b: int,
                 pin_led_r: int,
                 pin_led_y1: int,
                 pin_led_y2: int,
                 pin_led_y3: int,
                 pin_motor_fw: int,
-                # pin_sw_start: int = None,
                 pin_sw_rap: int = None):
         self.speed_change.set_pins(
-            pin_rotary_a, 
-            pin_rotary_b, 
             pin_motor_fw, 
             pin_led_r, 
             pin_led_y1, 
             pin_led_y2, 
             pin_led_y3)
-        # self.pin_sw_start = pin_sw_start
         self.pin_sw_rap  = pin_sw_rap
         self.reset()
     
@@ -41,15 +35,9 @@ class MotorControl:
         self.rap_btn  = Button(self.pin_sw_rap , pull_up=True, pin_factory=FACTORY)
 
     def run(self, time_main: TimeMain):
-        # # ボタンリリース時の処理
-        # func = MotorControl.start_script(self)
-        # self.start_btn.when_released = func
-
         # ボタンリリース時の処理
         func = MotorControl.rap_script(self, time_main)
         self.rap_btn.when_released = func
-
-        # self.speed_change.run()
 
     @staticmethod
     def start_script(motor_control):

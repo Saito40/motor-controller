@@ -1,7 +1,5 @@
-# from threading import Event
 from MainWindow import MainWindow
 from MotorControl.TimeData import TimeData
-from MotorControl.Factory import FACTORY
 import RPi.GPIO as GPIO
 # import pigpio
 # pi = pigpio.pi()
@@ -35,8 +33,6 @@ class SpeedChange:
         SpeedChange.id_counter += 1
 
     def set_pins(self, 
-                 pin_rotary_a: int, 
-                 pin_rotary_b: int, 
                  pin_motor_fw: int,
                  pin_led_r : int ,
                  pin_led_y1: int,
@@ -107,8 +103,6 @@ class SpeedChange:
                 else:
                     motor_speed_id = MOTOR_SPEED_STEP
 
-            print(f"{speed_change.name}: motor_speed_id is {motor_speed_id}")
-            
             for i, pin in enumerate(speed_change.led_pin_list):
                 GPIO.output(pin, i == motor_speed_id)
             MainWindow.speed_change(speed_change.timedata, motor_speed_id)

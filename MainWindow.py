@@ -1,9 +1,7 @@
 # -*- coding:utf-8 -*-
 import tkinter
-from tkinter.simpledialog import Dialog
 from tkinter import messagebox
 import tkinter.ttk as ttk
-# import time
 from datetime import datetime, timedelta
 from MotorControl.TimeData import TimeData, TimeMain
 from setting import *
@@ -127,7 +125,7 @@ class MainWindow:
     @staticmethod
     def update_time(main_window):
         for mc in main_window.motor_control_list:
-            mc.speed_change.volume_func()        
+            mc.speed_change.volume_func()
         # update_time関数を再度INTERVAL[ms]後に実行
         timemain = main_window.time_main
         timemain.after_id = MainWindow.Root.after(
@@ -181,16 +179,16 @@ class MainWindow:
     def test_rap_and_stop(timedata: TimeData, timemain: TimeMain):
         def inner():
             if not timemain.start_flag: return
-
+            
             if not timedata.start_flag: return
             rap_count = len(timedata.rap_times)
-            if rap_count <= RAP_COUNT:
-                time = datetime.now() - timemain.start_time
-                if rap_count!=0:
-                    time = time - sum(timedata.rap_times, timedelta(0))
-                timedata.rap_times.append(time)
-                timedata.rap_labels[rap_count].config(
-                    text=rap_time_label_format(rap_count+1, MainWindow.time_to_str(time)))
+            time = datetime.now() - timemain.start_time
+            if rap_count!=0:
+                time = time - sum(timedata.rap_times, timedelta(0))
+            if time < timedelta(seconds=TIME_SPAN): return
+            timedata.rap_times.append(time)
+            timedata.rap_labels[rap_count].config(
+                text=rap_time_label_format(rap_count+1, MainWindow.time_to_str(time)))
 
             if RAP_COUNT <= len(timedata.rap_times):
                 timedata.start_flag = False
@@ -241,13 +239,11 @@ class MainWindow:
 
 
 if __name__ == "__main__":
-    class rotor:
-        def __init__(self):
-            self.when_rotated = lambda: print("rotor")
     class sp:
+        counter = 0
         def __init__(self):
             self.timedata = TimeData()
-            self.rotor = rotor()
+            self.volume_func = (lambda: None)
             self.move = False
     class mc:
         def __init__(self):
