@@ -99,7 +99,7 @@ class MainWindow:
                 row_counter += 1
 
         MainWindow.reset(self.time_main)
-        
+        MainWindow.update_time(self)
         MainWindow.Root.mainloop()
 
     @staticmethod
@@ -125,10 +125,13 @@ class MainWindow:
         return inner
     
     @staticmethod
-    def update_time(timemain: TimeMain):
-
+    def update_time(main_window):
+        for mc in main_window.motor_control_list:
+            mc.speed_change.volume_func()        
         # update_time関数を再度INTERVAL[ms]後に実行
-        timemain.after_id = MainWindow.Root.after(INTERVAL, lambda:MainWindow.update_time(timemain))
+        timemain = main_window.time_main
+        timemain.after_id = MainWindow.Root.after(
+            INTERVAL, lambda:MainWindow.update_time(main_window))
         # print(sw_class.after_id)
         if not timemain.start_flag: return
 
@@ -221,12 +224,10 @@ class MainWindow:
             main_window.time_main.start_time = datetime.now()
             for td in main_window.time_main.time_data_list:
                 td.move = True
-            for mc in main_window.motor_control_list:
-                mc.speed_change.rotor.when_rotated()
 
             # update_timeをINTERVAL[ms] 後に実行
             main_window.time_main.after_id = MainWindow.Root.after(
-                INTERVAL, lambda:MainWindow.update_time(main_window.time_main))
+                INTERVAL, lambda:MainWindow.update_time(main_window))
         return inner
 
     @staticmethod

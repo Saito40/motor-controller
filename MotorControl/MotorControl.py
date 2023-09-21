@@ -1,6 +1,4 @@
-from threading import Event
-from gpiozero import RotaryEncoder, Button
-from gpiozero.pins.pigpio import PiGPIOFactory
+from gpiozero import Button
 import RPi.GPIO as GPIO
 from MotorControl.SpeedChange import SpeedChange
 from MotorControl.TimeData import TimeData, TimeMain
