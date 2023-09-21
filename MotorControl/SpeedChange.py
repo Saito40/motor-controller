@@ -93,7 +93,7 @@ class SpeedChange:
     def check_volume(speed_change):
         def inner():
 
-            resp = SpeedChange.spi.xfer2(copy.deepcopy(speed_change.xfer2_list))               #SPI通信で値を読み込む
+            resp = SpeedChange.spi.xfer2(copy.deepcopy(speed_change.spi_xfer2_list))               #SPI通信で値を読み込む
             volume = ((resp[0] << 8) + resp[1]) & 0x3FF  #読み込んだ値を10ビットの数値に変換
             
             motor_speed_id = 0
