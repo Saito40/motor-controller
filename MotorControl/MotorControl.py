@@ -33,7 +33,7 @@ class MotorControl:
     
     def reset(self):
         # self.start_btn = Button(self.pin_sw_start, pull_up=True, pin_factory=FACTORY)
-        self.rap_btn  = Button(self.pin_sw_rap , pull_up=True, pin_factory=FACTORY)
+        self.rap_btn = Button(self.pin_sw_rap , pull_up=True, pin_factory=FACTORY)
 
     def run(self, time_main: TimeMain):
         # ボタンリリース時の処理
