@@ -1,3 +1,4 @@
+from __future__ import annotations
 from MainWindow import MainWindow
 from MotorControl.TimeData import TimeData
 import RPi.GPIO as GPIO
@@ -66,7 +67,7 @@ class SpeedChange:
                 + low_speed)
 
     @staticmethod
-    def change_rotor(speed_change):
+    def change_rotor(speed_change: SpeedChange):
         def inner():
             print(f"{speed_change.name}: rotor.steps is {speed_change.rotor.steps}")
             motor_speed_id = speed_change.rotor.steps
@@ -86,7 +87,7 @@ class SpeedChange:
         return inner
     
     @staticmethod
-    def check_volume(speed_change):
+    def check_volume(speed_change: SpeedChange):
         def inner():
 
             resp = SpeedChange.spi.xfer2(copy.deepcopy(speed_change.spi_xfer2_list))               #SPI通信で値を読み込む

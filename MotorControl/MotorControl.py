@@ -1,3 +1,4 @@
+from __future__ import annotations
 from gpiozero import Button
 import RPi.GPIO as GPIO
 from MotorControl.SpeedChange import SpeedChange
@@ -40,7 +41,7 @@ class MotorControl:
         self.rap_btn.when_released = func
 
     @staticmethod
-    def start_script(motor_control):
+    def start_script(motor_control: MotorControl):
         def inner():
             print(f"{motor_control.speed_change.name}:start")
             
@@ -61,7 +62,7 @@ class MotorControl:
         return inner
 
     @staticmethod
-    def rap_script(motor_control, timemain: TimeMain):
+    def rap_script(motor_control: MotorControl, timemain: TimeMain):
         def inner():
             if not timemain.start_flag: return
             

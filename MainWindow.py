@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+from __future__ import annotations
 import tkinter
 from tkinter import messagebox
 import tkinter.ttk as ttk
@@ -123,7 +124,7 @@ class MainWindow:
         return inner
     
     @staticmethod
-    def update_time(main_window):
+    def update_time(main_window: MainWindow):
         for mc in main_window.motor_control_list:
             mc.speed_change.volume_func()
         # update_time関数を再度INTERVAL[ms]後に実行
@@ -205,7 +206,7 @@ class MainWindow:
         return inner
     
     @staticmethod
-    def start(main_window):
+    def start(main_window: MainWindow):
         def inner():
             # MainWindow.update_time(td)
             # 計測中でなければ時間計測開始
@@ -229,7 +230,7 @@ class MainWindow:
         return inner
 
     @staticmethod
-    def speed_change(td, speed: int):
+    def speed_change(td: TimeData, speed: int):
         for i, label in enumerate(td.speed_label_list):
             if i <= speed:
                 label.config(text=LABEL_ON_)
