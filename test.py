@@ -1,10 +1,19 @@
-import math, sys, os, time
-import RPi.GPIO as GPIO
+"""
+description: test
+"""
+
+import math
+import RPi.GPIO as GPIO  # pylint: disable=E0401
+
 
 def istrue(check_num):
+    """
+    description: return true if check_num is greater than 20
+    """
     if 20 < math.pow(check_num):
         return True
-    else: return False
+    return False
+
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(17, GPIO.OUT)
@@ -16,6 +25,4 @@ for i in range(10):
     else:
         GPIO.output(17, GPIO.HIGH)
 
-
 GPIO.cleanup()
-
