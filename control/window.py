@@ -234,20 +234,3 @@ class Window:
                 label.config(text=setting.LABEL_ON_)
             else:
                 label.config(text=setting.LABEL_OFF)
-
-
-if __name__ == "__main__":
-    class mc:  # pylint: disable=C0103, C0115
-        counter = 0
-
-        def __init__(self):
-            self.rap_data = RapData()
-            self.volume_func = lambda: None
-            self.move = False
-    mcs = [
-        mc(),
-        mc(),
-    ]
-    window = Window(mcs, TimerData())
-    window.create_window(debug=True)
-    window.show_window()
