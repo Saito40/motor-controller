@@ -25,11 +25,6 @@ class Window:
             motor_control_list: list,
             timer_data: TimerData
             ):
-        Window.root.title("スロットカー")
-        Window.root.geometry(Window.window_size)
-        # MainWindow.Root.resizable(False, False)
-        Window.root.bind("<Escape>", Window.exit_key_event)
-        Window.root.protocol("WM_DELETE_WINDOW", Window.exit_key_event)
         self.motor_control_list = motor_control_list
         self.timer_data = timer_data
         self.frame = tkinter.Frame(Window.root)
@@ -42,6 +37,14 @@ class Window:
             ウインドウを作成します。
         """
 
+        # ウインドウの設定
+        Window.root.title("スロットカー")
+        Window.root.geometry(Window.window_size)
+        # MainWindow.Root.resizable(False, False)
+        Window.root.bind("<Escape>", Window.exit_key_event)
+        Window.root.protocol("WM_DELETE_WINDOW", Window.exit_key_event)
+
+        # ラベルの設定
         row_counter = 0
 
         self.start_button = tkinter.Button(
