@@ -34,6 +34,9 @@ def check():
     pins.extend(setting.B_LED_PIN_LIST)
     pins.extend(setting.SPI_PIN)
 
+    if len(setting.A_LED_PIN_LIST) != len(setting.B_LED_PIN_LIST):
+        raise RuntimeError("A_LED_PIN_LIST != B_LED_PIN_LIST")
+
     # ピン番号の重複チェック
     for i in range(len(pins)):  # pylint: disable=C0200
         for j in range(i+1, len(pins)):

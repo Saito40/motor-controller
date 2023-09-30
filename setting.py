@@ -18,12 +18,12 @@ SPI_PIN = [8, 9, 10, 11]
 
 # モーター関連
 # 0 < MOTOR_SPEED < 15(motor=3V) < 100(MAX)
-MOTOR_LOW__SPEED = 10       # 1段階目のスピード
-MOTOR_HIGH_SPEED = 100      # 最終段階のスピード
-RAP_COUNT = 3               # ラップ数
-TIME_SPAN = 1               # ラップタイムがのチェック間隔[s]
+MOTOR_LOW__SPEED = 10   # 1段階目のスピード
+MOTOR_HIGH_SPEED = 100  # 最終段階のスピード
+RAP_COUNT = 3           # ラップ数
+TIME_SPAN = 1           # ラップタイムがのチェック間隔[s]
 STOP_SPEED = 0.
-PWM_FREQ = 1                # Hz
+PWM_FREQ = 1            # Hz
 
 # ROTARY_MAX_STEPS = 200
 VOLUME_MAX = 1024           # ボリューム検知の最大値
