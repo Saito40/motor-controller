@@ -5,9 +5,9 @@ description:
 """
 from RPi import GPIO  # pylint: disable=E0401
 import setting
-# from control.motor_control import MotorControl
-# from control.label_data import TimerLabel
-# from control.window import Window
+from control.motor_control import MotorControl
+from control.time_data import TimerData
+from control.window import Window
 
 
 def main():
@@ -16,7 +16,25 @@ def main():
         この関数は、メイン関数です。
         この関数を実行することで、プログラムが動きます。
     """
-    pass
+    timer_data = TimerData()
+
+    control_a = MotorControl(timer_data, "controlA")
+    control_b = MotorControl(timer_data, "controlB")
+
+    control_a.set_pins(
+        setting.A_LED_PIN_LIST,
+        setting.A_MOTOR_FW_PIN,
+        setting.A_SW_RAP___PIN)
+
+    control_b.set_pins(
+        setting.B_LED_PIN_LIST,
+        setting.B_MOTOR_FW_PIN,
+        setting.B_SW_RAP___PIN)
+
+    # ディスプレイ表示
+    window = Window([control_a, control_b], timer_data)
+    window.create_window(debug=True)
+    window.show_window()
 
 
 def check():
