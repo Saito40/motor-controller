@@ -2,13 +2,13 @@
 description:
     Windowのテストを行います。
 """
+import dataclasses
 from control.window import Window
 from control.time_data import TimerData, RapData
 
 
+@dataclasses.dataclass
 class mc:  # pylint: disable=C0103, C0115
-    counter = 0
-
     def __init__(self):
         self.rap_data = RapData()
         self.volume_func = lambda: None
