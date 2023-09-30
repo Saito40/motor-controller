@@ -4,7 +4,7 @@ description:
 """
 from __future__ import annotations
 import copy
-import RPi.GPIO as GPIO  # pylint: disable=E0401
+from RPi import GPIO  # pylint: disable=E0401
 from gpiozero import Button
 from gpiozero.pins.pigpio import PiGPIOFactory
 import spidev  # pylint: disable=E0401

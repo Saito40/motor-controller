@@ -2,7 +2,6 @@
 description:
     このファイルではtkinterのウインドウを動かします。
 """
-# -*- coding:utf-8 -*-
 from __future__ import annotations
 import tkinter
 from tkinter import messagebox
