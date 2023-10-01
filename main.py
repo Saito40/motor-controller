@@ -84,3 +84,4 @@ if __name__ == "__main__":
     except Exception as ex:  # pylint: disable=W0718
         print(ex)
     GPIO.cleanup()
+    MotorControl.close()
