@@ -76,6 +76,34 @@ def check():
             elif ans == "Y":
                 break
 
+    # 可変抵抗の範囲チェック
+    degs = [
+        setting.VOLUME_RANGE_MIN_DEG,
+        setting.VOLUME_RANGE_MAX_DEG,
+        setting.VOLUME_SPEED_MIN_DEG,
+        setting.VOLUME_SPEED_MAX_DEG]
+    for i, deg in enumerate(degs):
+        if setting.VOLUME_ROTATE_DEG < deg:
+            raise RuntimeError(
+                "VOLUME_ROTATE_DEG < deg: "
+                + str(setting.VOLUME_ROTATE_DEG) + " < "
+                + str(degs[i]))
+
+    degs = [
+        setting.VOLUME_SPEED_MIN_DEG,
+        setting.VOLUME_SPEED_MAX_DEG]
+    for i, deg in enumerate(degs):
+        if setting.VOLUME_RANGE_MAX_DEG < deg:
+            raise RuntimeError(
+                "VOLUME_RANGE_MAX_DEG < deg: "
+                + str(setting.VOLUME_RANGE_MAX_DEG) + " < "
+                + str(degs[i]))
+        if deg < setting.VOLUME_RANGE_MIN_DEG:
+            raise RuntimeError(
+                "deg < VOLUME_RANGE_MIN_DEG: "
+                + str(degs[i]) + " < "
+                + str(setting.VOLUME_RANGE_MIN_DEG))
+
 
 if __name__ == "__main__":
     check()
