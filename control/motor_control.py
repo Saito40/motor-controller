@@ -28,18 +28,20 @@ class MotorControl:
     spi = spidev.SpiDev()                    # インスタンスを生成
     spi.open(0, 0)                           # CE0(24番ピン)を指定
     spi.max_speed_hz = setting.MAX_SPEED_HZ  # 転送速度 1MHz
-    volume_separate = []
-    _max_per_all = setting.VOLUME_MAX / setting.VOLUME_ALL_DEG
-    _volume_min = setting.VOLUME_SPEED_MIN_DEG * _max_per_all
-    _volume_max = setting.VOLUME_SPEED_MAX_DEG * _max_per_all
-    _volume_d_4 = (_volume_min - _volume_max)/4
 
     speed_step = len(setting.A_LED_PIN_LIST) - 1
 
+    volume_separate = []
+    _max_per_all = setting.VOLUME_MAX / setting.VOLUME_ROTATE_DEG
+    _volume_min = setting.VOLUME_SPEED_MIN_DEG * _max_per_all
+    _volume_max = setting.VOLUME_SPEED_MAX_DEG * _max_per_all
+    _volume_d_4 = (_volume_min - _volume_max)/4
     for i in range(1, speed_step+1):
         volume_separate.append(-i * _volume_d_4 + _volume_min)
-
     print(volume_separate)
+
+    volume_range_min = setting.VOLUME_RANGE_MIN_DEG * _max_per_all
+    volume_range_max = setting.VOLUME_RANGE_MAX_DEG * _max_per_all
 
     xfer2_l_in_l = [[0x68, 0x00], [0x78, 0x00]]
     id_counter = 0
@@ -168,6 +170,9 @@ class MotorControl:
                         break
                 else:
                     motor_speed_id = MotorControl.speed_step
+            if not MotorControl.volume_range_min < volume \
+                    < MotorControl.volume_range_max:
+                motor_speed_id = 0
 
             for i, pin in enumerate(motor_control.pin_led_list):
                 GPIO.output(pin, i == motor_speed_id)
