@@ -5,8 +5,8 @@ description:
 from __future__ import annotations
 import copy
 from RPi import GPIO  # pylint: disable=E0401
-from gpiozero import Button
-from gpiozero.pins.pigpio import PiGPIOFactory
+from gpiozero import Button  # pylint: disable=E0401
+from gpiozero.pins.pigpio import PiGPIOFactory  # pylint: disable=E0401
 import spidev  # pylint: disable=E0401
 from control.time_data import RapData, TimerData
 from control.window import Window
@@ -130,7 +130,7 @@ class MotorControl:
                 motor_speed_id,
                 len(motor_control.speed_list)-1
             )
-            for i, pin in enumerate(motor_control.led_pin_list):
+            for i, pin in enumerate(motor_control.pin_led_list):
                 GPIO.output(pin, i == motor_speed_id)
             Window.speed_change(motor_control.rap_data, motor_speed_id)
 
@@ -169,7 +169,7 @@ class MotorControl:
                 else:
                     motor_speed_id = MotorControl.speed_step
 
-            for i, pin in enumerate(motor_control.led_pin_list):
+            for i, pin in enumerate(motor_control.pin_led_list):
                 GPIO.output(pin, i == motor_speed_id)
             Window.speed_change(motor_control.rap_data, motor_speed_id)
 
