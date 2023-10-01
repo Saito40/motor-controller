@@ -29,7 +29,7 @@ class MotorControl:
     spi.open(0, 0)                           # CE0(24番ピン)を指定
     spi.max_speed_hz = setting.MAX_SPEED_HZ  # 転送速度 1MHz
     volume_separate = []
-    _max_per_all = setting.VOLUME_MAX / setting.VOLUME_ALL_DEG
+    _max_per_all = setting.VOLUME_MAX / setting.VOLUME_ROTATE_DEG
     _volume_min = setting.VOLUME_SPEED_MIN_DEG * _max_per_all
     _volume_max = setting.VOLUME_SPEED_MAX_DEG * _max_per_all
     _volume_d_4 = (_volume_min - _volume_max)/4

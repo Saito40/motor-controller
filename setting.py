@@ -27,9 +27,7 @@ PWM_FREQ = 1            # Hz
 
 # ROTARY_MAX_STEPS = 200
 VOLUME_MAX = 1024           # ボリューム検知の最大値
-VOLUME_ALL_DEG = 210        # ボリュームの回転範囲
-VOLUME_SPEED_MIN_DEG = 210  # ボリューム最小の角度
-VOLUME_SPEED_MAX_DEG = 150  # ボリューム最大の角度
+VOLUME_ROTATE_DEG = 210        # ボリュームの回転角度
 MAX_SPEED_HZ = 1000_000     # SPI通信の周波数[Hz]
 
 # ウインドウ関連
