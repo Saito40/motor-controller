@@ -3,6 +3,13 @@ description:
     このファイルは、設定ファイルです。
 """
 
+# コース名
+COURSE_NAME = "2023_10_1__test_cource"
+
+# データ保存関連
+DATA_SAVE_DIR = "cource_time_files/"
+SAVE_EXTENTION = ".csv"
+
 # ピン番号
 A_LED_PIN_LIST = [21, 26, 20, 19]  # stop, 1,...
 A_MOTOR_FW_PIN = 24
