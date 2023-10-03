@@ -6,6 +6,8 @@ description:
 
 from datetime import datetime, timedelta
 import tkinter
+from tkinter import messagebox
+from control.inout_data import InOutData
 import setting
 
 
@@ -226,6 +228,22 @@ class TimerData:
         if all((not rap_data.start_flag)
                 for rap_data in self.rap_data_list):
             self.start_flag = False
+            sum_time_list = [
+                rap_data.sum_time for rap_data in self.rap_data_list]
+
+            sorted_result_data = InOutData.save_file(sum_time_list)
+            message_str = ""
+            for i, result_data in enumerate(sorted_result_data):
+                message_str += (
+                    str(i+1) + "位: No. "
+                    + str(result_data.id_) + " "
+                    + time_to_str(result_data.sum_time))
+                if 8 < i:
+                    break
+                else:
+                    message_str += "\n"
+
+            messagebox.showinfo("Result", message_str)
 
     def start(self):
         """
