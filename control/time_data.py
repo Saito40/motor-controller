@@ -38,6 +38,7 @@ class RapData:
         self.sum_label = None
         self.start_flag = False
         self.move = False
+        self.sum_time = None
 
     def set_speed_label_list(self, min_frame: tkinter.Frame):
         """
@@ -147,11 +148,10 @@ class RapData:
 
         if setting.RAP_COUNT <= len(self.rap_times):
             self.start_flag = False
+            self.sum_time = sum(self.rap_times, timedelta(0))
             self.sum_label.config(
                 text=setting.sum_time_label_format(
-                    time_to_str(
-                        sum(self.rap_times, timedelta(0))
-                    )
+                    time_to_str(self.sum_time)
                 )
             )
         return True
