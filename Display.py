@@ -1,6 +1,6 @@
 """test display"""
 import datetime
-import pygame
+import pygame  # pylint: disable=E0401
 
 
 pygame.init()  # pylint: disable=E1101
