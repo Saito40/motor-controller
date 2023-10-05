@@ -33,7 +33,7 @@ def main():
 
     # ディスプレイ表示
     window = Window([control_a, control_b], timer_data)
-    window.create_window(debug=True)
+    window.create_window()
     window.show_window()
 
 
