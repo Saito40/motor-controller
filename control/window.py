@@ -39,7 +39,9 @@ class Window:
         Window.root.title("スロットカー")
         Window.root.geometry(Window.window_size)
         # MainWindow.Root.resizable(False, False)
-        Window.root.bind("<Escape>", Window.exit_key_event)
+        Window.root.bind(setting.EXIT_KEY, Window.exit_key_event)
+        func = Window.start_key_event(self)
+        Window.root.bind(setting.START_KEY, func)
         Window.root.protocol("WM_DELETE_WINDOW", Window.exit_key_event)
 
         # ラベルの設定
@@ -116,6 +118,17 @@ class Window:
         res = messagebox.askyesno(title="確認", message="終了しますか？")
         if res:
             Window.root.destroy()
+
+    @staticmethod
+    def start_key_event(window: Window):
+        """
+        description:
+            スタートボタンを押したときに呼び出されます。
+        """
+        def inner(*args):
+            *args, = args
+            Window.start(window)()
+        return inner
 
     @staticmethod
     def update_time(window: Window):

@@ -46,6 +46,7 @@ MAX_SPEED_HZ = 1000_000     # SPI通信の周波数[Hz]
 WINDOW_SIZE_W = 1800
 WINDOW_SIZE_H = 900
 EXIT_KEY = "<Escape>"
+START_KEY = "<Control-Key-s>"
 TIMER_FONT = ("", 150, "bold", "italic")
 RAP_FONT = ("", 60, "italic")
 BUTTON_FONT = ("", 60)
