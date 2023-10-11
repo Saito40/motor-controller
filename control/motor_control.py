@@ -90,7 +90,8 @@ class MotorControl:
         self.rap_button = Button(
             self.pin_sw_rap,
             pull_up=True,
-            pin_factory=MotorControl.FACTORY
+            pin_factory=MotorControl.FACTORY,
+            bounce_time=1e-7
             )
         # ボタンリリース時の処理
         func = MotorControl.rap_script(self, self.timer_data)

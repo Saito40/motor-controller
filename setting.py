@@ -43,17 +43,19 @@ VOLUME_SPEED_MAX_DEG = 120  # ボリューム最大の角度
 MAX_SPEED_HZ = 1000_000     # SPI通信の周波数[Hz]
 
 # ウインドウ関連
-WINDOW_SIZE_W = 600
-WINDOW_SIZE_H = 400
+WINDOW_SIZE_W = 1800
+WINDOW_SIZE_H = 900
 EXIT_KEY = "<Escape>"
-TIMER_FONT = ("", 50, "bold", "italic")
-RAP_FONT = ("", 20, "italic")
+START_KEY = "<Control-Key-s>"
+TIMER_FONT = ("", 150, "bold", "italic")
+RAP_FONT = ("", 60, "italic")
+BUTTON_FONT = ("", 60)
 PAD_X = 20
 
 # ラベル関連
 LABEL_ON_ = "●"
 LABEL_OFF = "◌"
-ONOFF_FONT = ("", 20, "bold")
+ONOFF_FONT = ("", 60, "bold")
 X00_00_000 = "00:00.000"
 INTERVAL = 10  # ラベルを更新する間隔[ms]
 
