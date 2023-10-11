@@ -48,7 +48,8 @@ class Window:
         # スタートボタンの設定
         self.start_button = tkinter.Button(
             self.frame,
-            text="start"
+            text="start",
+            font=setting.BUTTON_FONT
         )
         func = Window.start(self)
         self.start_button.config(command=func)

@@ -48,6 +48,7 @@ WINDOW_SIZE_H = 900
 EXIT_KEY = "<Escape>"
 TIMER_FONT = ("", 150, "bold", "italic")
 RAP_FONT = ("", 60, "italic")
+BUTTON_FONT = ("", 60)
 PAD_X = 20
 
 # ラベル関連
