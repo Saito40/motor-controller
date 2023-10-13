@@ -67,14 +67,9 @@ def check():
         raise RuntimeError("MOTOR_LOW_SPEED > MOTOR_HIGH_SPEED")
 
     if 15 < setting.MOTOR_HIGH_SPEED:
-        print("15 < setting.MOTOR_HIGH_SPEED")
-        while True:
-            print("over 3V? [Y/n]")
-            ans = input()
-            if ans == "n":
-                exit(1)
-            elif ans == "Y":
-                break
+        print("Warning:")
+        print("- 15 < setting.MOTOR_HIGH_SPEED")
+        print("- Over 3V")
 
     # 可変抵抗の範囲チェック
     degs = [
