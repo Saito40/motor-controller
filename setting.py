@@ -19,9 +19,8 @@ B_LED_PIN_LIST = [16, 13, 6, 12]  # stop, 1,...
 B_MOTOR_FW_PIN = 23
 B_SW_RAP___PIN = 18
 
-# SPIのピン番号をチェックに流す
-# ここを変更してもSPIのピン番号は変わりません
-SPI_PIN = [8, 9, 10, 11]
+# 使用されているピン(SPIのピン)をチェックに流す
+USED_PIN = [0, 1, 8, 9, 10, 11]
 
 # モーター関連
 # 0 < MOTOR_SPEED < 15(motor=3V) < 100(MAX)

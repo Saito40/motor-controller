@@ -50,7 +50,7 @@ def check():
         setting.B_SW_RAP___PIN]
     pins.extend(setting.A_LED_PIN_LIST)
     pins.extend(setting.B_LED_PIN_LIST)
-    pins.extend(setting.SPI_PIN)
+    pins.extend(setting.USED_PIN)
 
     if len(setting.A_LED_PIN_LIST) != len(setting.B_LED_PIN_LIST):
         raise RuntimeError("A_LED_PIN_LIST != B_LED_PIN_LIST")
