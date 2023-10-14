@@ -40,7 +40,7 @@ class Window:
         Window.root.geometry(Window.window_size)
         # MainWindow.Root.resizable(False, False)
         Window.root.bind(setting.EXIT_KEY, Window.exit_key_event)
-        func = Window.start_key_event(self)
+        func = Window.start(self)
         Window.root.bind(setting.START_KEY, func)
         Window.root.protocol("WM_DELETE_WINDOW", Window.exit_key_event)
 
@@ -120,17 +120,6 @@ class Window:
             Window.root.destroy()
 
     @staticmethod
-    def start_key_event(window: Window):
-        """
-        description:
-            スタートボタンを押したときに呼び出されます。
-        """
-        def inner(*args):
-            *args, = args
-            Window.start(window)()
-        return inner
-
-    @staticmethod
     def update_time(window: Window):
         """
         description:
@@ -168,7 +157,8 @@ class Window:
         description:
             スタートボタンを押したときに呼び出されます。
         """
-        def inner():
+        def inner(*args):
+            *args, = args
             # 計測中でなければ時間計測開始
             res = messagebox.askyesno(title="確認", message="初めますか？")
             if not res:
