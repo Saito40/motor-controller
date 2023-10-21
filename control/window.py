@@ -5,6 +5,7 @@ description:
 from __future__ import annotations
 import tkinter
 from tkinter import messagebox
+import pygame
 from control.time_data import RapData, TimerData
 import setting
 
@@ -163,6 +164,11 @@ class Window:
             res = messagebox.askyesno(title="確認", message="初めますか？")
             if not res:
                 return
+
+            # BGM再生
+            pygame.mixer.init(frequency=44100)
+            pygame.mixer.music.load(setting.RACE_BGM)
+            pygame.mixer.music.play(-1)
 
             Window.reset(window.timer_data)
             window.timer_data.start()

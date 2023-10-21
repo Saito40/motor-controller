@@ -45,7 +45,7 @@ MAX_SPEED_HZ = 1000_000     # SPI通信の周波数[Hz]
 WINDOW_SIZE_W = 1800
 WINDOW_SIZE_H = 900
 EXIT_KEY = "<Escape>"
-START_KEY = "<Control-Key-s>"
+START_KEY = "<F5>"
 TIMER_FONT = ("", 150, "bold", "italic")
 RAP_FONT = ("", 60, "italic")
 BUTTON_FONT = ("", 60)
@@ -57,6 +57,9 @@ LABEL_OFF = "◌"
 ONOFF_FONT = ("", 60, "bold")
 X00_00_000 = "00:00.000"
 INTERVAL = 10  # ラベルを更新する間隔[ms]
+
+# 音関連
+RACE_BGM = "redistribution_prohibited_folder\追い抜け駆け抜けろ!的なBGM.mp3"
 
 
 def rap_time_label_format(rap_id: int, time_str: str) -> str:
