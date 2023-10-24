@@ -5,8 +5,16 @@ description:
 from __future__ import annotations
 import tkinter
 from tkinter import messagebox
+import copy
+from RPi import GPIO  # pylint: disable=E0401
+from gpiozero import Button  # pylint: disable=E0401
+from gpiozero.pins.pigpio import PiGPIOFactory  # pylint: disable=E0401
+import spidev  # pylint: disable=E0401
 import setting
+# import pigpio
+# pi = pigpio.pi()
 
+GPIO.setmode(GPIO.BCM)
 ui_font = list(setting.BUTTON_FONT)
 ui_font[1] = int(ui_font[1]*2/3)
 ui_font = tuple(ui_font)
@@ -22,6 +30,128 @@ class HScale(tkinter.Scale):
         super().__init__(*args, **kwargs)
 
 
+class DummyControl:
+    """
+    description:
+        モーターの制御を行います。
+    """
+
+    FACTORY = PiGPIOFactory()
+    # SPI通信を行うための準備
+    spi = spidev.SpiDev()                    # インスタンスを生成
+    spi.open(0, 0)                           # CE0(24番ピン)を指定
+    spi.max_speed_hz = setting.MAX_SPEED_HZ  # 転送速度 1MHz
+
+    xfer2_l_in_l = [[0x68, 0x00], [0x78, 0x00]]
+    id_counter = 0
+
+    def __init__(self):
+        self.pin_led_list = []
+        self.pin_motor_fw = -1
+        self.pin_sw_rap = -1
+        self.spi_xfer2_list = \
+            DummyControl.xfer2_l_in_l[DummyControl.id_counter]
+        DummyControl.id_counter += 1
+        self.rap_button = None
+        self.motor_fw_pwm = None
+        self.volume_func = None
+        self.rap_sw_check = None
+        self.rap_sw_count = 0
+
+    def set_rap_sw_label(self,
+                         frame: tkinter.Frame,
+                         i: int,
+                         row_counter: int) -> int:
+        """
+        description:
+            ラップタイムのラベルを設定します。
+        """
+        self.rap_sw_check = tkinter.Label(
+            frame,
+            background="BLACK",
+            width=int(setting.PAD_X/5),
+            font=ui_font,
+            foreground="WHITE",
+            text=self.rap_sw_count
+        )
+        self.rap_sw_check.grid(
+            row=row_counter, column=i)
+        row_counter += 2
+        return row_counter
+
+    def set_pins(self,
+                 pin_led_list: list[int],
+                 pin_motor_fw: int,
+                 pin_sw_rap: int):
+        """
+        description:
+            ピンを設定します。
+        """
+        self.pin_led_list = pin_led_list
+        self.pin_motor_fw = pin_motor_fw
+        self.pin_sw_rap = pin_sw_rap
+        self.reset()
+
+    def reset(self):
+        """
+        description:
+            リセットします。
+        """
+        self.rap_button = Button(
+            self.pin_sw_rap,
+            pull_up=True,
+            pin_factory=DummyControl.FACTORY,
+            bounce_time=1e-7
+            )
+        # ボタンリリース時の処理
+        func = DummyControl.rap_script(self)
+        self.rap_button.when_released = func
+
+        GPIO.setup(self.pin_motor_fw, GPIO.OUT)
+        self.motor_fw_pwm = GPIO.PWM(self.pin_motor_fw, setting.PWM_FREQ)
+        self.motor_fw_pwm.start(0)
+
+        for pin in self.pin_led_list:
+            GPIO.setup(pin, GPIO.OUT)
+        GPIO.output(self.pin_led_list[0], True)
+
+        self.volume_func = DummyControl.check_volume(self)
+
+    def close(self):
+        """
+        description:
+            リセットします。
+        """
+        self.motor_fw_pwm.changeDutyCycle(0)
+        for pin in self.pin_led_list:
+            GPIO.output(pin, False)
+
+    @staticmethod
+    def rap_script(motor_control: DummyControl):
+        """
+        description:
+            ラップを行います。
+        """
+        def inner():
+            motor_control.rap_sw_count += 1
+            motor_control.rap_sw_check.configure(
+                text=str(motor_control.rap_sw_count))
+        return inner
+
+    @staticmethod
+    def check_volume(motor_control: DummyControl):
+        """
+        description:
+            ボリュームをチェックします。
+        """
+        def inner() -> int:
+            # SPI通信で値を読み込む
+            resp = DummyControl.spi.xfer2(
+                copy.deepcopy(motor_control.spi_xfer2_list))
+            return ((resp[0] << 8) + resp[1]) & 0x3FF  # 読み込んだ値を10ビットの数値に変換
+        return inner
+
+
 class CheckerWindow:
     """
     description:
@@ -30,15 +160,12 @@ class CheckerWindow:
     root = tkinter.Tk()
     window_size = str(setting.WINDOW_SIZE_W) + "x" + str(setting.WINDOW_SIZE_H)
 
-    def __init__(self, motor_control_list: list = None):
-        motor_control_list = ["mcA", "mcB"]
+    def __init__(self, dummy_control_list: list = None):
         self.frame = tkinter.Frame(CheckerWindow.root)
         self.frame.pack()
-        self.motor_control_list = motor_control_list
+        self.dummy_control_list = dummy_control_list
         self.start_button = None
         self.after_id = ""
-        self.in_list = []
-        self.out_list = []
 
     def create_window(self):
         """
@@ -54,66 +181,57 @@ class CheckerWindow:
         CheckerWindow.root.protocol(
             "WM_DELETE_WINDOW", CheckerWindow.exit_key_event)
 
-        row_counter = 0
-        rap_sw_label = tkinter.Label(
+        _row_counter = 0
+        _rap_sw_label = tkinter.Label(
             self.frame,
             text="RAP_SW",
             font=setting.BUTTON_FONT
         )
-        rap_sw_label.grid(
-            row=row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
-        row_counter += 2
+        _rap_sw_label.grid(
+            row=_row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
+        _row_counter += 2
 
-        motor_label = tkinter.Label(
+        _motor_label = tkinter.Label(
             self.frame,
             text="MOTOR",
             font=setting.BUTTON_FONT
         )
-        motor_label.grid(
-            row=row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
-        row_counter += 2
+        _motor_label.grid(
+            row=_row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
+        _row_counter += 2
 
-        volume_label = tkinter.Label(
+        _volume_label = tkinter.Label(
             self.frame,
             text="VOLUME",
             font=setting.BUTTON_FONT
         )
-        volume_label.grid(
-            row=row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
-        row_counter += 2
+        _volume_label.grid(
+            row=_row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
+        _row_counter += 2
 
-        led_label = tkinter.Label(
+        _led_label = tkinter.Label(
             self.frame,
             text="LED",
             font=setting.BUTTON_FONT
         )
-        led_label.grid(
-            row=row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
+        _led_label.grid(
+            row=_row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
 
-        cache = row_counter = 1
-        wigget_list = []
-        for i, rap_data in enumerate(self.motor_control_list):
-            print(rap_data)
-            wigget_dict = {}
+        _cache = _row_counter = 1
+        _wigget_list = []
+        for i, dummy_control in enumerate(self.dummy_control_list):
+            _wigget_dict = {}
 
-            row_counter = cache
+            _row_counter = _cache
 
-            rap_sw_check = tkinter.Label(
-                self.frame,
-                background="BLACK",
-                width=int(setting.PAD_X/5),
-                font=ui_font,
-                foreground="WHITE",
-                text="0"
-            )
-            rap_sw_check.grid(
-                row=row_counter, column=i)
-            wigget_dict["rap_sw_check"] = rap_sw_check
-            row_counter += 2
+            _row_counter = dummy_control.set_rap_sw_label(
+                    self.frame, i, _row_counter)
+            _wigget_dict["rap_sw_check"] = dummy_control.rap_sw_check
 
-            def volume_func(itr):
+            def volume_func(itr, dummy_control):
                 def inner(volume):
                     print(itr, volume)
+                    dummy_control.motor_fw_pwm.ChangeDutyCycle(volume)
                 return inner
             motor_frame = tkinter.Frame(self.frame)
             motor_volume = HScale(
@@ -125,7 +243,7 @@ class CheckerWindow:
                 resolution=1,
                 tickinterval=50,
                 font=ui_font,
-                command=volume_func(i)
+                command=volume_func(i, dummy_control)
             )
             motor_volume.grid(
                 row=0, column=1, padx=setting.PAD_X)
@@ -143,9 +261,9 @@ class CheckerWindow:
             motor_stop.grid(
                 row=0, column=0, padx=setting.PAD_X)
             motor_frame.grid(
-                row=row_counter, column=i, padx=setting.PAD_X)
-            wigget_dict["motor_volume"] = motor_volume
-            row_counter += 2
+                row=_row_counter, column=i, padx=setting.PAD_X)
+            _wigget_dict["motor_volume"] = motor_volume
+            _row_counter += 2
 
             volume_preview = tkinter.Label(
                 self.frame,
@@ -153,17 +271,18 @@ class CheckerWindow:
                 font=ui_font
             )
             volume_preview.grid(
-                row=row_counter, column=i, padx=setting.PAD_X)
-            wigget_dict["volume_preview"] = volume_preview
-            row_counter += 2
+                row=_row_counter, column=i, padx=setting.PAD_X)
+            _wigget_dict["volume_preview"] = volume_preview
+            _row_counter += 2
 
             led_preview = tkinter.Frame(self.frame)
             variable = tkinter.IntVar()
             variable.set("0")
             speed_list = ["X", "0", "1", "2", "3"]
-            wigget_dict["led_button_list"] = []
+            _wigget_dict["led_button_list"] = []
             for j in range(5):
-                stop_func = CheckerWindow.changed_raddio_button(variable)
+                stop_func = CheckerWindow.changed_raddio_button(
+                    variable, dummy_control)
                 led_button = tkinter.Radiobutton(
                     led_preview,
                     text=speed_list[j],
@@ -175,14 +294,14 @@ class CheckerWindow:
                     width=int(setting.PAD_X/8),
                 )
                 led_button.grid(row=0, column=j)
-                wigget_dict["led_button_list"].append(led_button)
+                _wigget_dict["led_button_list"].append(led_button)
             led_preview.grid(
-                row=row_counter, column=i, padx=setting.PAD_X*3)
-            wigget_list.append(wigget_dict)
-        row_counter += 1
+                row=_row_counter, column=i, padx=setting.PAD_X*3)
+            _wigget_list.append(_wigget_dict)
+        _row_counter += 1
 
         def reset_func():
-            for wigget_dict in wigget_list:
+            for wigget_dict in _wigget_list:
                 wigget_dict["rap_sw_check"].configure(text="0")
                 wigget_dict["motor_volume"].set(0)
                 wigget_dict["volume_preview"].configure(text="0")
@@ -196,7 +315,7 @@ class CheckerWindow:
             command=reset_func
         )
         stop_button.grid(
-            row=row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
+            row=_row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
 
     def show_window(self):
         """
@@ -206,9 +325,6 @@ class CheckerWindow:
         # CheckerWindow.update(self)
         CheckerWindow.root.mainloop()
 
-    # def volume_set(self):
-    #     pass
-
     @staticmethod
     def update(window: CheckerWindow):
         """
@@ -216,12 +332,11 @@ class CheckerWindow:
             時間を更新します。
         """
         # volumeがどの程度かチェックし、モーターのスピードを変更
-        # for motor_control in window.motor_control_list:
-        #     motor_control.volume_func()
-        # # update_time関数を再度INTERVAL[ms]後に実行
-        # window.after_id = CheckerWindow.root.after(
-        #     setting.INTERVAL, lambda: CheckerWindow.update(window))
-        # window.volume_set()
+        for dummy_control in window.dummy_control_list:
+            dummy_control.volume_func()
+        # update_time関数を再度INTERVAL[ms]後に実行
+        window.after_id = CheckerWindow.root.after(
+            setting.INTERVAL, lambda: CheckerWindow.update(window))
 
     @staticmethod
     def exit_key_event(*args):
@@ -235,7 +350,8 @@ class CheckerWindow:
             CheckerWindow.root.destroy()
 
     @staticmethod
-    def changed_raddio_button(variable: tkinter.StringVar):
+    def changed_raddio_button(variable: tkinter.StringVar,
+                              dummy_control: DummyControl):
         """
         description:
             ラジオボタンが変更されたときに呼び出されます。
@@ -244,6 +360,10 @@ class CheckerWindow:
             value = variable.get()
             if value == 0:
                 print("stop")
+                for i in range(4):
+                    GPIO.output(dummy_control.pin_led_list[i], False)
                 return
-            print(variable.get()-1)
+            print(value-1)
+            for i in range(4):
+                GPIO.output(dummy_control.pin_led_list[i], value-1 == i)
         return inner
