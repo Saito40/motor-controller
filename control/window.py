@@ -165,10 +165,13 @@ class Window:
             if not res:
                 return
 
-            # BGM再生
-            pygame.mixer.init(frequency=44100)
-            pygame.mixer.music.load(setting.RACE_BGM)
-            pygame.mixer.music.play(-1)
+            try:
+                # BGM再生
+                pygame.mixer.init(frequency=44100)
+                pygame.mixer.music.load(setting.RACE_BGM)
+                pygame.mixer.music.play(-1)
+            except Exception as ex:  # pylint: disable=broad-except
+                print(ex)
 
             Window.reset(window.timer_data)
             window.timer_data.start()
