@@ -57,6 +57,7 @@ class DummyControl:
         self.volume_func = None
         self.rap_sw_check = None
         self.rap_sw_count = 0
+        self.volume_preview = None
 
     def set_rap_sw_label(self,
                          frame: tkinter.Frame,
@@ -76,6 +77,24 @@ class DummyControl:
         )
         self.rap_sw_check.grid(
             row=row_counter, column=i)
+        row_counter += 2
+        return row_counter
+
+    def set_volume_preview(self,
+                           frame: tkinter.Frame,
+                           i: int,
+                           row_counter: int) -> int:
+        """
+        description:
+            ボリュームのラベルを設定します。
+        """
+        volume_preview = tkinter.Label(
+            frame,
+            text="0",
+            font=ui_font
+        )
+        volume_preview.grid(
+            row=row_counter, column=i, padx=setting.PAD_X)
         row_counter += 2
         return row_counter
 
@@ -122,7 +141,7 @@ class DummyControl:
         description:
             リセットします。
         """
-        self.motor_fw_pwm.changeDutyCycle(0)
+        self.motor_fw_pwm.ChangeDutyCycle(0)
         for pin in self.pin_led_list:
             GPIO.output(pin, False)
 
@@ -144,11 +163,12 @@ class DummyControl:
         description:
             ボリュームをチェックします。
         """
-        def inner() -> int:
+        def inner():
             # SPI通信で値を読み込む
             resp = DummyControl.spi.xfer2(
                 copy.deepcopy(motor_control.spi_xfer2_list))
-            return ((resp[0] << 8) + resp[1]) & 0x3FF  # 読み込んだ値を10ビットの数値に変換
+            motor_control.volume_preview.configure(
+                text=str(((resp[0] << 8) + resp[1]) & 0x3FF))
         return inner
 
 
@@ -231,7 +251,7 @@ class CheckerWindow:
             def volume_func(itr, dummy_control):
                 def inner(volume):
                     print(itr, volume)
-                    dummy_control.motor_fw_pwm.ChangeDutyCycle(volume)
+                    dummy_control.motor_fw_pwm.ChangeDutyCycle(int(volume))
                 return inner
             motor_frame = tkinter.Frame(self.frame)
             motor_volume = HScale(
@@ -265,19 +285,13 @@ class CheckerWindow:
             _wigget_dict["motor_volume"] = motor_volume
             _row_counter += 2
 
-            volume_preview = tkinter.Label(
-                self.frame,
-                text="0",
-                font=ui_font
-            )
-            volume_preview.grid(
-                row=_row_counter, column=i, padx=setting.PAD_X)
-            _wigget_dict["volume_preview"] = volume_preview
-            _row_counter += 2
+            _row_counter = dummy_control.set_volume_preview(
+                    self.frame, i, _row_counter)
+            _wigget_dict["volume_preview"] = dummy_control.volume_preview
 
             led_preview = tkinter.Frame(self.frame)
             variable = tkinter.IntVar()
-            variable.set("0")
+            variable.set(0)
             speed_list = ["X", "0", "1", "2", "3"]
             _wigget_dict["led_button_list"] = []
             for j in range(5):
@@ -322,7 +336,7 @@ class CheckerWindow:
         description:
             ウインドウを表示します。
         """
-        # CheckerWindow.update(self)
+        CheckerWindow.update(self)
         CheckerWindow.root.mainloop()
 
     @staticmethod
