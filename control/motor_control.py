@@ -33,15 +33,24 @@ class MotorControl:
 
     volume_separate = []
     _max_per_all = setting.VOLUME_MAX / setting.VOLUME_ROTATE_DEG
-    _volume_min = setting.VOLUME_SPEED_MIN_DEG * _max_per_all
-    _volume_max = setting.VOLUME_SPEED_MAX_DEG * _max_per_all
-    _volume_d_4 = (_volume_min - _volume_max)/4
+    _sign_transformation = 1
+    if setting.VOLUME_SPEED_MAX_DEG < setting.VOLUME_SPEED_MIN_DEG:
+        _sign_transformation = -1
+    _volume_min = setting.VOLUME_SPEED_MIN_DEG \
+        * _max_per_all \
+        * _sign_transformation
+    _volume_max = setting.VOLUME_SPEED_MAX_DEG \
+        * _max_per_all \
+        * _sign_transformation
+    _volume_d_4 = (_volume_max - _volume_min)/4
     for i in range(1, speed_step+1):
-        volume_separate.append(-i * _volume_d_4 + _volume_min)
+        volume_separate.append(i * _volume_d_4 + _volume_min)
+    print("volume_separate")
     print(volume_separate)
 
     volume_range_min = setting.VOLUME_RANGE_MIN_DEG * _max_per_all
     volume_range_max = setting.VOLUME_RANGE_MAX_DEG * _max_per_all
+    print(volume_range_min, volume_range_max)
 
     xfer2_l_in_l = [[0x68, 0x00], [0x78, 0x00]]
     id_counter = 0
@@ -94,8 +103,8 @@ class MotorControl:
             bounce_time=1e-7
             )
         # ボタンリリース時の処理
-        func = MotorControl.rap_script(self, self.timer_data)
-        self.rap_button.when_released = func
+        # func = MotorControl.rap_script(self, self.timer_data)
+        # self.rap_button.when_released = func
 
         GPIO.setup(self.pin_motor_fw, GPIO.OUT)
         self.motor_fw_pwm = GPIO.PWM(self.pin_motor_fw, setting.PWM_FREQ)
@@ -161,19 +170,12 @@ class MotorControl:
             volume = ((resp[0] << 8) + resp[1]) & 0x3FF  # 読み込んだ値を10ビットの数値に変換
 
             motor_speed_id = 0
-            if MotorControl.volume_separate[0] < volume:
-                motor_speed_id = 0
-            else:
-                for i in range(len(MotorControl.volume_separate)-1):
-                    if volume < MotorControl.volume_separate[i] and \
-                            MotorControl.volume_separate[i+1] <= volume:
-                        motor_speed_id = i+1
-                        break
-                else:
-                    motor_speed_id = MotorControl.speed_step
-            if not MotorControl.volume_range_min < volume \
+            if MotorControl.volume_range_min < volume \
                     < MotorControl.volume_range_max:
-                motor_speed_id = 0
+                volume *= MotorControl._sign_transformation
+                for vs in MotorControl.volume_separate:
+                    if vs < volume:
+                        motor_speed_id += 1
 
             for i, pin in enumerate(motor_control.pin_led_list):
                 GPIO.output(pin, i == motor_speed_id)
