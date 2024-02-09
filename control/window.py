@@ -40,6 +40,10 @@ class Window:
         # ウインドウの設定
         Window.root.title("スロットカー")
         Window.root.geometry(Window.window_size)
+        if debug:
+            Window.root.geometry(
+                str(setting.WINDOW_SIZE_W) + "x" +
+                str(setting.WINDOW_SIZE_H + 100))
         # MainWindow.Root.resizable(False, False)
         Window.root.bind(setting.EXIT_KEY, Window.exit_key_event)
         func = Window.start(self)
@@ -91,6 +95,25 @@ class Window:
 
             # テスト用のボタンを設定
             if debug:
+                def create_command(rap_data):
+                    def inner(value):
+                        rap_data.volume = float(value)
+                    return inner
+
+                test_scale = HScale(
+                    self.frame,
+                    width=30,
+                    length=300,
+                    from_=0,
+                    to=setting.VOLUME_MAX,
+                    resolution=1,
+                    # tickinterval=0,
+                    font=setting.BUTTON_FONT,
+                    command=create_command(rap_data)
+                )
+                test_scale.grid(row=row_counter, column=i, sticky=tkinter.E)
+                row_counter += 1
+
                 test = tkinter.Button(
                     self.frame,
                     text="t_rap&stop"

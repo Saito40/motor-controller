@@ -11,6 +11,7 @@ from gpiozero import Button  # pylint: disable=E0401
 from gpiozero.pins.pigpio import PiGPIOFactory  # pylint: disable=E0401
 import spidev  # pylint: disable=E0401
 import setting
+from control.horizontal_scale import HScale
 # import pigpio
 # pi = pigpio.pi()
 
@@ -18,16 +19,6 @@ GPIO.setmode(GPIO.BCM)
 ui_font = list(setting.BUTTON_FONT)
 ui_font[1] = int(ui_font[1]*2/3)
 ui_font = tuple(ui_font)
-
-
-class HScale(tkinter.Scale):
-    """
-    description:
-        水平方向にスケールを表示します。
-    """
-    def __init__(self, *args, **kwargs):
-        kwargs["orient"] = tkinter.HORIZONTAL
-        super().__init__(*args, **kwargs)
 
 
 class DummyControl:
@@ -88,12 +79,12 @@ class DummyControl:
         description:
             ボリュームのラベルを設定します。
         """
-        volume_preview = tkinter.Label(
+        self.volume_preview = tkinter.Label(
             frame,
             text="0",
             font=ui_font
         )
-        volume_preview.grid(
+        self.volume_preview.grid(
             row=row_counter, column=i, padx=setting.PAD_X)
         row_counter += 2
         return row_counter
@@ -154,6 +145,8 @@ class DummyControl:
         def inner():
             motor_control.rap_sw_count += 1
             motor_control.rap_sw_check.configure(
+                background="WHITE",
+                foreground="BLACK",
                 text=str(motor_control.rap_sw_count))
         return inner
 
@@ -330,6 +323,7 @@ class CheckerWindow:
         )
         stop_button.grid(
             row=_row_counter, column=0, padx=setting.PAD_X, sticky=tkinter.W)
+        reset_func()
 
     def show_window(self):
         """
