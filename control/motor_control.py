@@ -94,8 +94,8 @@ class MotorControl:
             bounce_time=1e-7
             )
         # ボタンリリース時の処理
-        func = MotorControl.rap_script(self, self.timer_data)
-        self.rap_button.when_released = func
+        # func = MotorControl.rap_script(self, self.timer_data)
+        # self.rap_button.when_released = func
 
         GPIO.setup(self.pin_motor_fw, GPIO.OUT)
         self.motor_fw_pwm = GPIO.PWM(self.pin_motor_fw, setting.PWM_FREQ)
