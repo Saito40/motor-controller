@@ -4,7 +4,7 @@ description:
 """
 
 # コース名
-COURSE_NAME = "2023_10_1__test_cource"
+COURSE_NAME = "2024_01_1__test_cource"
 
 # データ保存関連
 DATA_SAVE_DIR = "cource_time_files/"

@@ -7,6 +7,7 @@ import tkinter
 from tkinter import messagebox
 import pygame
 from control.time_data import RapData, TimerData
+from control.horizontal_scale import HScale
 import setting
 
 
