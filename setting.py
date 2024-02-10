@@ -37,8 +37,8 @@ VOLUME_MAX = 1024           # ボリューム検知の最大値
 VOLUME_ROTATE_DEG = 330     # ボリュームの回転角度
 VOLUME_RANGE_MIN_DEG = 10   # ボリュームの回転範囲の最小値、断線時を想定して実装
 VOLUME_RANGE_MAX_DEG = 320  # ボリュームの回転範囲の最大値、断線時を想定して実装
-VOLUME_SPEED_MIN_DEG = 150  # ボリューム最小の角度
-VOLUME_SPEED_MAX_DEG = 240  # ボリューム最大の角度
+VOLUME_SPEED_MIN_DEG = 200  # ボリューム最小の角度
+VOLUME_SPEED_MAX_DEG = 120  # ボリューム最大の角度
 MAX_SPEED_HZ = 1000_000     # SPI通信の周波数[Hz]
 
 # ウインドウ関連
