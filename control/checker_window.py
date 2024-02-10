@@ -35,6 +35,7 @@ class DummyControl:
 
     xfer2_l_in_l = [[0x68, 0x00], [0x78, 0x00]]
     id_counter = 0
+    _all_per_max = setting.VOLUME_ROTATE_DEG / setting.VOLUME_MAX
 
     def __init__(self):
         self.pin_led_list = []
@@ -160,8 +161,10 @@ class DummyControl:
             # SPI通信で値を読み込む
             resp = DummyControl.spi.xfer2(
                 copy.deepcopy(motor_control.spi_xfer2_list))
+            volume = ((resp[0] << 8) + resp[1]) & 0x3FF
             motor_control.volume_preview.configure(
-                text=str(((resp[0] << 8) + resp[1]) & 0x3FF))
+                text=str(volume) + "" +
+                str(int(volume*DummyControl._all_per_max * 10) / 10))
         return inner
 
 
